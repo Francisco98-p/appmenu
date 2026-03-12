@@ -1,0 +1,83 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  rol       String   @default("owner")
+  localId   Int?
+  createdAt DateTime @default(now())
+  local     Local?   @relation(fields: [localId], references: [id])
+}
+
+model Local {
+  id         Int        @id @default(autoincrement())
+  nombre     String
+  logo       String?
+  slug       String     @unique
+  cbuAlias   String?    // CBU o Alias para transferencias
+  mercadoPagoLink String? // Link de pago de Mercado Pago
+  categorias Category[]
+  pedidos    Order[]
+  mesas      Table[]
+  users      User[]
+}
+
+model Table {
+  id      Int    @id @default(autoincrement())
+  numero  String
+  localId Int
+  local   Local  @relation(fields: [localId], references: [id])
+}
+
+model Category {
+  id        Int       @id @default(autoincrement())
+  localId   Int
+  nombre    String
+  orden     Int
+  local     Local     @relation(fields: [localId], references: [id])
+  productos Product[]
+}
+
+model Product {
+  id          Int         @id @default(autoincrement())
+  categoryId  Int
+  nombre      String
+  descripcion String?
+  precio      Float
+  imagen      String?
+  activo      Boolean     @default(true)
+  orderItems  OrderItem[]
+  categoria   Category    @relation(fields: [categoryId], references: [id])
+}
+
+model Order {
+  id             Int         @id @default(autoincrement())
+  localId        Int
+  mesa           String
+  estado         String      @default("Recibido")
+  total          Float
+  metodoPago     String
+  pagoConfirmado Boolean     @default(false)
+  createdAt      DateTime    @default(now())
+  local          Local       @relation(fields: [localId], references: [id])
+  items          OrderItem[]
+}
+
+model OrderItem {
+  id             Int     @id @default(autoincrement())
+  orderId        Int
+  productId      Int
+  cantidad       Int
+  precioUnitario Float
+  aclaracion     String?
+  producto       Product @relation(fields: [productId], references: [id])
+  pedido         Order   @relation(fields: [orderId], references: [id])
+}

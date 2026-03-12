@@ -1,0 +1,7 @@
+-- CreateTable
+CREATE TABLE "Table" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "numero" TEXT NOT NULL,
+    "localId" INTEGER NOT NULL,
+    CONSTRAINT "Table_localId_fkey" FOREIGN KEY ("localId") REFERENCES "Local" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
