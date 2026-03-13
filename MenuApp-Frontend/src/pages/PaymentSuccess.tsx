@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
 
 const PaymentSuccess = () => {
@@ -28,10 +28,16 @@ const PaymentSuccess = () => {
         onClick={() => navigate('/')}
         className="bg-primary hover:bg-primary-dark text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-primary/20"
       >
-        Volver al Menú
-      </button>
-    </div>
-  );
-};
+                Volver al Menú
+              </button>
+              <Link 
+                to="/status"
+                className="mt-4 text-primary hover:text-primary-dark font-bold"
+              >
+                Consultar estado del pedido
+              </Link>
+            </div>
+          );
+        };
 
 export default PaymentSuccess;

@@ -6,6 +6,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailure from './pages/PaymentFailure';
 import PaymentPending from './pages/PaymentPending';
+import OrderStatus from './pages/OrderStatus';
 import { useAuthStore } from './context/authStore';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/payment/success" element={<PaymentSuccess />} />
           <Route path="/payment/failure" element={<PaymentFailure />} />
           <Route path="/payment/pending" element={<PaymentPending />} />
+          <Route path="/status" element={<OrderStatus />} />
 
           {/* Admin Routes */}
         <Route path="/admin/login" element={<Login />} />
