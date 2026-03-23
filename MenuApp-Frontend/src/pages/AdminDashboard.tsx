@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { LayoutDashboard, ShoppingBag, Utensils, Settings, LogOut, CheckCircle, Clock, ArrowRight, X } from 'lucide-react';
+import { LayoutDashboard, ShoppingBag, Utensils, Settings, LogOut, CheckCircle, Clock, ArrowRight, X, Package, Plus, Minus, Search, Trash2 } from 'lucide-react';
 import api from '../api/axios';
 import { useAuthStore } from '../context/authStore';
 import { useNavigate } from 'react-router-dom';
@@ -11,7 +11,24 @@ const AdminDashboard = () => {
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [allTables, setAllTables] = useState<any[]>([]);
   const [newTableNum, setNewTableNum] = useState('');
-    const [activeTab, setActiveTab] = useState<'salon' | 'config'>('salon');
+    const [activeTab, setActiveTab] = useState<'salon' | 'config' | 'stock'>('salon');
+    const [products, setProducts] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
+    const [kitchens, setKitchens] = useState<any[]>([]);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedKitchen, setSelectedKitchen] = useState<string>('all');
+    const [showNewProductModal, setShowNewProductModal] = useState(false);
+    const [showKitchenModal, setShowKitchenModal] = useState(false);
+    const [newKitchenName, setNewKitchenName] = useState('');
+    const [newProduct, setNewProduct] = useState({
+      nombre: '',
+      descripcion: '',
+      precio: '',
+      categoryId: '',
+      kitchenId: '',
+      imagen: '',
+      stock: '0'
+    });
     const [localSettings, setLocalSettings] = useState<any>({
       nombre: '',
       logo: '',
@@ -21,10 +38,20 @@ const AdminDashboard = () => {
   const { user, logout } = useAuthStore();
   const navigate = useNavigate();
 
-  useEffect(() => {
+    useEffect(() => {
     fetchOrders();
-        fetchTables();
-        fetchLocalSettings();
+    fetchTables();
+    fetchLocalSettings();
+    const fetchInitialData = async () => {
+      try {
+        const catRes = await api.get('/admin/categories');
+        setCategories(catRes.data);
+      } catch (err) {
+        console.error('Error fetching categories');
+      }
+    };
+    fetchInitialData();
+    fetchKitchens();
 
         // Set up real-time updates
     const socket = io('http://localhost:3001', {
@@ -143,6 +170,65 @@ const AdminDashboard = () => {
       }
     };
 
+  const handleCreateProduct = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await api.post('/admin/products', newProduct);
+      setShowNewProductModal(false);
+      setNewProduct({ 
+        nombre: '', 
+        descripcion: '', 
+        precio: '', 
+        categoryId: '', 
+        kitchenId: '', 
+        imagen: '', 
+        stock: '0' 
+      });
+      fetchProducts();
+    } catch (err) {
+      alert('Error al crear producto');
+    }
+  };
+
+    const fetchKitchens = async () => {
+      try {
+        const response = await api.get('/admin/kitchens');
+        setKitchens(response.data);
+      } catch (err) {
+        console.error('Error fetching kitchens');
+      }
+    };
+
+    const addKitchen = async (e: React.FormEvent) => {
+      e.preventDefault();
+      try {
+        await api.post('/admin/kitchens', { nombre: newKitchenName });
+        setNewKitchenName('');
+        fetchKitchens();
+      } catch (err) {
+        alert('Error al agregar cocina');
+      }
+    };
+
+    const deleteKitchen = async (id: number) => {
+      if (!window.confirm('¿Eliminar esta cocina? Asegurate de que no tenga productos asociados.')) return;
+      try {
+        await api.delete(`/admin/kitchens/${id}`);
+        fetchKitchens();
+      } catch (err) {
+        alert('Error al eliminar cocina. Verificá si tiene productos asociados.');
+      }
+    };
+
+    const fetchProducts = async () => {
+      try {
+        const response = await api.get('/admin/products');
+        setProducts(response.data);
+      } catch (err) {
+        console.error('Error fetching products');
+      }
+    };
+
   const deleteTableRecord = async (id: number) => {
     if (!window.confirm('¿Eliminar esta mesa?')) return;
     try {
@@ -152,6 +238,22 @@ const AdminDashboard = () => {
       alert('Error al eliminar mesa');
     }
   };
+
+  const updateStock = async (productId: number, newStock: number) => {
+    try {
+      await api.put(`/admin/products/${productId}/stock`, { stock: Math.max(0, newStock) });
+      fetchProducts();
+    } catch (err) {
+      alert('Error al actualizar stock');
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'stock') {
+      fetchProducts();
+      fetchKitchens();
+    }
+  }, [activeTab]);
 
   // Enhanced Grouping Logic: Include all configured tables
   const tables = allTables.reduce((acc: any, tableRecord: any) => {
@@ -214,6 +316,13 @@ const AdminDashboard = () => {
             <span className="font-bold tracking-tight">Mesas Activas</span>
           </button>
           <button 
+            onClick={() => setActiveTab('stock')}
+            className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border group ${activeTab === 'stock' ? 'bg-primary/10 text-primary border-primary/20' : 'text-gray-500 hover:text-white hover:bg-white/5 border-transparent'}`}
+          >
+            <Package size={22} className="group-hover:scale-110 transition-transform" />
+            <span className="font-bold tracking-tight">Gestión Stock</span>
+          </button>
+          <button 
             onClick={() => setActiveTab('config')}
             className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border group ${activeTab === 'config' ? 'bg-primary/10 text-primary border-primary/20' : 'text-gray-500 hover:text-white hover:bg-white/5 border-transparent'}`}
           >
@@ -243,10 +352,18 @@ const AdminDashboard = () => {
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-5xl font-black text-white tracking-tighter">Mesas</h2>
-              <div className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest border border-primary/20">Activas</div>
+              <h2 className="text-5xl font-black text-white tracking-tighter">
+                {activeTab === 'salon' ? 'Mesas' : activeTab === 'stock' ? 'Stock' : 'Config'}
+              </h2>
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest border border-primary/20">
+                {activeTab === 'salon' ? 'Activas' : activeTab === 'stock' ? 'Inventario' : 'Ajustes'}
+              </div>
             </div>
-            <p className="text-gray-500 font-medium">Control de cuentas y pedidos por mesa.</p>
+            <p className="text-gray-500 font-medium">
+              {activeTab === 'salon' ? 'Control de cuentas y pedidos por mesa.' : 
+               activeTab === 'stock' ? 'Control de disponibilidad de productos en tiempo real.' : 
+               'Gestión de mesas y configuración local.'}
+            </p>
           </div>
         </header>
 
@@ -338,6 +455,127 @@ const AdminDashboard = () => {
                 </div>
               ))
             )}
+          </div>
+        ) : activeTab === 'stock' ? (
+          <div className="max-w-6xl">
+            {/* Search and Filters */}
+            <div className="bg-gray-900 border border-white/5 p-6 rounded-[2rem] shadow-xl mb-10 flex flex-wrap items-center gap-6">
+              <div className="flex-1 min-w-[300px] relative">
+                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
+                <input 
+                  type="text" 
+                  placeholder="Buscar producto por nombre..." 
+                  className="w-full bg-black/40 border border-white/10 rounded-2xl pl-14 pr-6 py-4 text-white focus:outline-none focus:border-primary/50 transition-all font-bold"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+
+              <div className="flex items-center gap-4">
+                <select 
+                  value={selectedKitchen}
+                  onChange={(e) => setSelectedKitchen(e.target.value)}
+                  className="bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white font-bold focus:outline-none focus:border-primary/50 transition-all min-w-[150px]"
+                >
+                  <option value="all">Todas las Cocinas</option>
+                  {kitchens.map(k => <option key={k.id} value={k.id}>{k.nombre}</option>)}
+                </select>
+
+                <button 
+                  onClick={() => setShowKitchenModal(true)}
+                  className="bg-white/5 hover:bg-white/10 text-gray-400 p-4 rounded-xl transition-all border border-white/5"
+                  title="Gestionar Cocinas"
+                >
+                  <Utensils size={20} />
+                </button>
+              </div>
+
+              <button 
+                onClick={() => setShowNewProductModal(true)}
+                className="bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-primary/20 flex items-center gap-3 shrink-0"
+              >
+                <Plus size={18} /> Nuevo Producto
+              </button>
+            </div>
+
+            {/* Inventory Table */}
+            <div className="bg-gray-900 rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-black/40">
+                    <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-left">Producto</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-left">Categoría</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-left">Cocina</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">Stock Actual</th>
+                    <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {products
+                    .filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .filter(p => selectedKitchen === 'all' || p.kitchenId?.toString() === selectedKitchen)
+                    .map((product) => (
+                    <tr key={product.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
+                      <td className="px-8 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 rounded-xl bg-gray-800 border border-white/5 overflow-hidden">
+                            <img src={product.imagen || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=100&h=100&fit=crop"} className="w-full h-full object-cover" />
+                          </div>
+                          <div>
+                            <p className="font-black text-white italic uppercase tracking-tighter">{product.nombre}</p>
+                            <p className="text-gray-500 text-[10px] font-bold uppercase tracking-widest">${product.precio}</p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="px-3 py-1 bg-white/5 text-gray-400 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/5">
+                          {product.categoria?.nombre}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6">
+                        <span className="px-3 py-1 bg-primary/10 text-primary rounded-lg text-[10px] font-black uppercase tracking-widest border border-primary/10">
+                          {product.kitchen?.nombre || 'General'}
+                        </span>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className={`text-2xl font-black italic tracking-tight ${product.stock <= 5 ? 'text-red-500' : 'text-primary'}`}>
+                          {product.stock}
+                        </div>
+                      </td>
+                      <td className="px-8 py-6">
+                        <div className="flex items-center justify-center gap-3">
+                          <button 
+                            onClick={() => updateStock(product.id, product.stock - 1)}
+                            className="w-10 h-10 bg-white/5 hover:bg-red-500/10 hover:text-red-500 border border-white/10 rounded-xl flex items-center justify-center transition-all active:scale-90"
+                          >
+                            <Minus size={18} />
+                          </button>
+                          <button 
+                            onClick={() => updateStock(product.id, product.stock + 1)}
+                            className="w-10 h-10 bg-white/5 hover:bg-primary/10 hover:text-primary border border-white/10 rounded-xl flex items-center justify-center transition-all active:scale-90"
+                          >
+                            <Plus size={18} />
+                          </button>
+                          <input 
+                            type="number"
+                            className="w-16 bg-black/40 border border-white/10 rounded-xl px-2 py-2 text-center text-white focus:outline-none focus:border-primary/50 font-bold"
+                            defaultValue={product.stock}
+                            onBlur={(e) => updateStock(product.id, parseInt(e.target.value))}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {products.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="px-8 py-20 text-center text-gray-600 font-bold italic uppercase tracking-widest text-sm">
+                        Cargando inventario...
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         ) : (
           <div className="max-w-4xl">
@@ -500,6 +738,164 @@ const AdminDashboard = () => {
                     <CheckCircle size={24} /> Cerrar Mesa y Cobrar
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* New Product Modal */}
+        {showNewProductModal && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-6">
+            <div className="bg-gray-900 w-full max-w-2xl rounded-[3.5rem] shadow-3xl border border-white/10 flex flex-col overflow-hidden">
+              <div className="p-10 border-b border-white/5 flex justify-between items-center bg-black/20">
+                <h2 className="text-3xl font-black text-white tracking-tight italic uppercase">Nuevo Producto</h2>
+                <button onClick={() => setShowNewProductModal(false)} className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all">
+                  <X size={24} />
+                </button>
+              </div>
+              <form onSubmit={handleCreateProduct} className="p-10 space-y-8 overflow-y-auto max-h-[70vh] no-scrollbar">
+                <div className="grid grid-cols-2 gap-8">
+                  <div className="col-span-2">
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3">Nombre del Producto</label>
+                    <input 
+                      required
+                      type="text" 
+                      placeholder="Ej: Hamburguesa Especial"
+                      value={newProduct.nombre}
+                      onChange={(e) => setNewProduct({...newProduct, nombre: e.target.value})}
+                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold text-lg"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3">Categoría</label>
+                    <select 
+                      required
+                      value={newProduct.categoryId}
+                      onChange={(e) => setNewProduct({...newProduct, categoryId: e.target.value})}
+                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold appearance-none"
+                    >
+                      <option value="">Seleccionar...</option>
+                      {categories.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3">Cocina</label>
+                    <select 
+                      required
+                      value={newProduct.kitchenId}
+                      onChange={(e) => setNewProduct({...newProduct, kitchenId: e.target.value})}
+                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold appearance-none"
+                    >
+                      <option value="">General / Ninguna</option>
+                      {kitchens.map(k => <option key={k.id} value={k.id}>{k.nombre}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3">Precio ($)</label>
+                    <input 
+                      required
+                      type="number" 
+                      placeholder="0.00"
+                      value={newProduct.precio}
+                      onChange={(e) => setNewProduct({...newProduct, precio: e.target.value})}
+                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3">Stock Inicial</label>
+                    <input 
+                      required
+                      type="number" 
+                      value={newProduct.stock}
+                      onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3">URL de Imagen (Opcional)</label>
+                    <input 
+                      type="text" 
+                      placeholder="https://images.unsplash.com/..."
+                      value={newProduct.imagen}
+                      onChange={(e) => setNewProduct({...newProduct, imagen: e.target.value})}
+                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold text-sm"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-gray-400 text-[10px] font-black uppercase tracking-widest mb-3">Descripción (Opcional)</label>
+                    <textarea 
+                      placeholder="Breve descripción del producto..."
+                      value={newProduct.descripcion}
+                      onChange={(e) => setNewProduct({...newProduct, descripcion: e.target.value})}
+                      className="w-full bg-black/40 border border-white/10 rounded-2xl px-6 py-5 text-white focus:outline-none focus:border-primary/50 transition-all font-bold h-32 resize-none"
+                    />
+                  </div>
+                </div>
+                
+                <div className="flex gap-4 pt-4">
+                  <button 
+                    type="button"
+                    onClick={() => setShowNewProductModal(false)}
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-gray-400 py-6 rounded-3xl font-black uppercase tracking-widest text-xs transition-all border border-white/5"
+                  >
+                    Cancelar
+                  </button>
+                  <button 
+                    type="submit" 
+                    className="flex-[2] bg-primary hover:bg-primary-dark text-white py-6 rounded-3xl font-black uppercase tracking-widest text-xs shadow-2xl shadow-primary/20 transition-all active:scale-95"
+                  >
+                    Guardar Producto
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Kitchen Management Modal */}
+        {showKitchenModal && (
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-6">
+            <div className="bg-gray-900 w-full max-w-lg rounded-[3.5rem] shadow-3xl border border-white/10 flex flex-col overflow-hidden">
+              <div className="p-10 border-b border-white/5 flex justify-between items-center bg-black/20">
+                <h2 className="text-3xl font-black text-white tracking-tight italic uppercase">Gestión de Cocinas</h2>
+                <button onClick={() => setShowKitchenModal(false)} className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all">
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="p-10 space-y-8">
+                <form onSubmit={addKitchen} className="flex gap-4">
+                  <input 
+                    required
+                    type="text" 
+                    placeholder="Nombre de la cocina..."
+                    value={newKitchenName}
+                    onChange={(e) => setNewKitchenName(e.target.value)}
+                    className="flex-1 bg-black/40 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-primary/50 transition-all font-bold"
+                  />
+                  <button type="submit" className="bg-primary hover:bg-primary-dark text-white p-4 rounded-2xl transition-all">
+                    <Plus size={24} />
+                  </button>
+                </form>
+
+                <div className="space-y-4 max-h-[300px] overflow-y-auto no-scrollbar">
+                  {kitchens.map(kitchen => (
+                    <div key={kitchen.id} className="flex justify-between items-center bg-white/5 p-6 rounded-2xl border border-white/5 group hover:border-primary/30 transition-all">
+                      <div className="flex items-center gap-4">
+                        <Utensils className="text-primary" size={20} />
+                        <span className="font-bold text-white uppercase tracking-tight">{kitchen.nombre}</span>
+                      </div>
+                      <button 
+                        onClick={() => deleteKitchen(kitchen.id)}
+                        className="text-gray-600 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  ))}
+                  {kitchens.length === 0 && (
+                    <p className="text-center text-gray-600 italic py-8">No hay cocinas registradas.</p>
+                  )}
+                </div>
               </div>
             </div>
           </div>

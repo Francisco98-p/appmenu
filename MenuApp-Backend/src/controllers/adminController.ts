@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { prisma } from '../index';
+import { prisma } from '../lib/prisma';
 
 export const getOrders = async (req: Request, res: Response) => {
   const localId = (req as any).user.localId;
@@ -49,10 +49,18 @@ export const getCategories = async (req: Request, res: Response) => {
 };
 
 export const createProduct = async (req: Request, res: Response) => {
-  const { categoryId, nombre, descripcion, precio, imagen } = req.body;
+  const { categoryId, nombre, descripcion, precio, imagen, stock, kitchenId } = req.body;
   try {
     const product = await prisma.product.create({
-      data: { categoryId, nombre, descripcion, precio, imagen }
+      data: { 
+        categoryId: parseInt(categoryId), 
+        nombre, 
+        descripcion, 
+        precio: parseFloat(precio), 
+        imagen,
+        stock: parseInt(stock) || 0,
+        kitchenId: kitchenId ? parseInt(kitchenId) : null
+      }
     });
     res.json(product);
   } catch (error) {
@@ -106,5 +114,36 @@ export const updateLocalSettings = async (req: Request, res: Response) => {
     res.json(local);
   } catch (error) {
     res.status(500).json({ message: 'Error updating local settings' });
+  }
+};
+
+export const getAdminProducts = async (req: Request, res: Response) => {
+  const localId = (req as any).user.localId;
+  try {
+    const products = await prisma.product.findMany({
+      where: { categoria: { localId } },
+      include: { 
+        categoria: true,
+        kitchen: true
+      },
+      orderBy: { nombre: 'asc' }
+    });
+    res.json(products);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching products' });
+  }
+};
+
+export const updateProductStock = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { stock } = req.body;
+  try {
+    const product = await prisma.product.update({
+      where: { id: parseInt(id) },
+      data: { stock: parseInt(stock) }
+    });
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating product stock' });
   }
 };

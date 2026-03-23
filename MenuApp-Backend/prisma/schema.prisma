@@ -28,6 +28,7 @@ model Local {
   pedidos    Order[]
   mesas      Table[]
   users      User[]
+  kitchens   Kitchen[]
 }
 
 model Table {
@@ -54,8 +55,19 @@ model Product {
   precio      Float
   imagen      String?
   activo      Boolean     @default(true)
+  stock       Int         @default(0)
+  kitchenId   Int?
   orderItems  OrderItem[]
   categoria   Category    @relation(fields: [categoryId], references: [id])
+  kitchen     Kitchen?    @relation(fields: [kitchenId], references: [id])
+}
+
+model Kitchen {
+  id        Int       @id @default(autoincrement())
+  nombre    String
+  localId   Int
+  local     Local     @relation(fields: [localId], references: [id])
+  productos Product[]
 }
 
 model Order {
