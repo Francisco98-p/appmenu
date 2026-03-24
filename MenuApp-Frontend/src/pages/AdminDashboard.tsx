@@ -478,7 +478,8 @@ const AdminDashboard = () => {
                   className="bg-black/40 border border-white/10 rounded-xl px-4 py-4 text-white font-bold focus:outline-none focus:border-primary/50 transition-all min-w-[150px]"
                 >
                   <option value="all">Todas las Cocinas</option>
-                  {kitchens.map(k => <option key={k.id} value={k.id}>{k.nombre}</option>)}
+                  <option value="none">Sin Cocina / General</option>
+                  {kitchens.map(k => <option key={k.id} value={k.id.toString()}>{k.nombre}</option>)}
                 </select>
 
                 <button 
@@ -498,6 +499,55 @@ const AdminDashboard = () => {
               </button>
             </div>
 
+            {/* Stock Summary Section */}
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mb-10">
+                <div className="bg-gray-900 border border-white/5 p-6 rounded-3xl shadow-xl hover:border-primary/20 transition-all group">
+                    <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">General / Sin Cocina</p>
+                    <div className="flex justify-between items-end">
+                        {(() => {
+                            const generalProducts = products.filter(p => !p.kitchenId);
+                            const totalStock = generalProducts.reduce((sum, p) => sum + p.stock, 0);
+                            const lowStockCount = generalProducts.filter(p => p.stock <= 5).length;
+                            return (
+                                <>
+                                    <div>
+                                        <h3 className="text-3xl font-black text-white">{totalStock} <span className="text-[10px] text-gray-500 uppercase">uds.</span></h3>
+                                        <p className="text-[10px] font-bold text-gray-500">{generalProducts.length} productos</p>
+                                    </div>
+                                    {lowStockCount > 0 && (
+                                        <div className="bg-red-500/10 text-red-500 px-2 py-1 rounded-lg text-[10px] font-bold animate-pulse">
+                                            {lowStockCount} alertas
+                                        </div>
+                                    )}
+                                </>
+                            );
+                        })()}
+                    </div>
+                </div>
+                {kitchens.map(k => {
+                    const kitchenProducts = products.filter(p => p.kitchenId === k.id);
+                    const totalStock = kitchenProducts.reduce((sum, p) => sum + p.stock, 0);
+                    const lowStockCount = kitchenProducts.filter(p => p.stock <= 5).length;
+                    
+                    return (
+                        <div key={k.id} className="bg-gray-900 border border-white/5 p-6 rounded-3xl shadow-xl hover:border-primary/20 transition-all group">
+                            <p className="text-primary text-[10px] font-black uppercase tracking-widest mb-1">{k.nombre}</p>
+                            <div className="flex justify-between items-end">
+                                <div>
+                                    <h3 className="text-3xl font-black text-white">{totalStock} <span className="text-[10px] text-gray-500 uppercase">uds.</span></h3>
+                                    <p className="text-[10px] font-bold text-gray-500">{kitchenProducts.length} productos</p>
+                                </div>
+                                {lowStockCount > 0 && (
+                                    <div className="bg-red-500/10 text-red-500 px-2 py-1 rounded-lg text-[10px] font-bold animate-pulse">
+                                        {lowStockCount} alertas
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+
             {/* Inventory Table */}
             <div className="bg-gray-900 rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden">
               <table className="w-full text-left border-collapse">
@@ -513,7 +563,11 @@ const AdminDashboard = () => {
                 <tbody className="divide-y divide-white/5">
                   {products
                     .filter(p => p.nombre.toLowerCase().includes(searchTerm.toLowerCase()))
-                    .filter(p => selectedKitchen === 'all' || p.kitchenId?.toString() === selectedKitchen)
+                    .filter(p => {
+                        if (selectedKitchen === 'all') return true;
+                        if (selectedKitchen === 'none') return !p.kitchenId;
+                        return p.kitchenId?.toString() === selectedKitchen;
+                    })
                     .map((product) => (
                     <tr key={product.id} className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group">
                       <td className="px-8 py-6">

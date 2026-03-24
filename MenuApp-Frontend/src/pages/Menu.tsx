@@ -17,8 +17,6 @@ const Menu = () => {
     const [placingOrder, setPlacingOrder] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'MercadoPago'>('Efectivo');
     const [showMercadoPagoModal, setShowMercadoPagoModal] = useState(false);
-    const [mpPaymentStatus, setMpPaymentStatus] = useState<'pending' | 'processing' | 'success' | null>(null);
-    const [localPaymentInfo, setLocalPaymentInfo] = useState<any>({ cbuAlias: '', mercadoPagoLink: '' });
 
   const { items, addItem, removeItem, total, clearCart } = useCartStore();
 
@@ -30,11 +28,6 @@ const Menu = () => {
                 if (response.data.categorias.length > 0) {
                   setSelectedCategory(response.data.categorias[0].id);
                 }
-                // Load payment info
-                setLocalPaymentInfo({
-                  cbuAlias: response.data.cbuAlias || '',
-                  mercadoPagoLink: response.data.mercadoPagoLink || ''
-                });
       } catch (err) {
         setError('No se pudo cargar el menú. Verificá el enlace.');
       } finally {
@@ -89,9 +82,7 @@ const Menu = () => {
               console.error('Error creating preference:', err);
               // Fallback to simulation if Mercado Pago fails
               setShowMercadoPagoModal(true);
-              setMpPaymentStatus('processing');
               setTimeout(() => {
-                setMpPaymentStatus('success');
                 setTimeout(() => {
                   setShowMercadoPagoModal(false);
                   confirmOrder();
@@ -167,9 +158,7 @@ const Menu = () => {
                     <button 
                       onClick={() => {
                         // Simulate payment for testing
-                        setMpPaymentStatus('processing');
-                        setTimeout(() => {
-                          setMpPaymentStatus('success');
+                                  setTimeout(() => {
                           setTimeout(() => {
                             setShowMercadoPagoModal(false);
                             confirmOrder();

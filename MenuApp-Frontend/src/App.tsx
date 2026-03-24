@@ -7,6 +7,7 @@ import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentFailure from './pages/PaymentFailure';
 import PaymentPending from './pages/PaymentPending';
 import OrderStatus from './pages/OrderStatus';
+import DemoLinks from './pages/DemoLinks';
 import { useAuthStore } from './context/authStore';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -19,6 +20,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Demo/landing Route */}
+        <Route path="/" element={<DemoLinks />} />
+        <Route path="/demo" element={<DemoLinks />} />
+
         {/* Customer Routes */}
           <Route path="/m/:slug" element={<Menu />} />
           <Route path="/payment/success" element={<PaymentSuccess />} />

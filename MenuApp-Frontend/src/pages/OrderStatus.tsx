@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, Clock, CheckCircle, ChefHat, Utensils, Package, XCircle } from 'lucide-react';
+import { Clock, CheckCircle, ChefHat, Package } from 'lucide-react';
 import api from '../api/axios';
 
 const OrderStatus = () => {
@@ -12,8 +12,7 @@ const OrderStatus = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await api.get('/menu/sanjuan-gourmet');
-      const localId = response.data.id;
+      await api.get('/menu/sanjuan-gourmet');
       
       // Get all orders for this local
       // For demo, we'll simulate with mock data

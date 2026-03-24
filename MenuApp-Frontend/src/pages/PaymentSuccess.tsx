@@ -4,7 +4,7 @@ import { CheckCircle } from 'lucide-react';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  useSearchParams();
 
   useEffect(() => {
     // Auto redirect to menu after 5 seconds
