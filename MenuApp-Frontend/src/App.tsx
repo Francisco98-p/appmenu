@@ -26,9 +26,9 @@ function App() {
 
         {/* Customer Routes */}
           <Route path="/m/:slug" element={<Menu />} />
-          <Route path="/payment/success" element={<PaymentSuccess />} />
-          <Route path="/payment/failure" element={<PaymentFailure />} />
-          <Route path="/payment/pending" element={<PaymentPending />} />
+          <Route path="/success" element={<PaymentSuccess />} />
+          <Route path="/failure" element={<PaymentFailure />} />
+          <Route path="/pending" element={<PaymentPending />} />
           <Route path="/status" element={<OrderStatus />} />
 
           {/* Admin Routes */}

@@ -16,7 +16,7 @@ const Menu = () => {
     const [isOrderSuccess, setIsOrderSuccess] = useState(false);
     const [placingOrder, setPlacingOrder] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'MercadoPago'>('Efectivo');
-    const [showMercadoPagoModal, setShowMercadoPagoModal] = useState(false);
+// Removido showMercadoPagoModal ya que usamos redirección directa
 
   const { items, addItem, removeItem, total, clearCart } = useCartStore();
 
@@ -56,38 +56,15 @@ const Menu = () => {
                 localId: local.id
               });
 
-              const { preferenceId } = preferenceResponse.data;
+              const { preferenceId, initPoint } = preferenceResponse.data;
 
-              if (preferenceId) {
-                // Initialize Mercado Pago SDK
-                const mp = new (window as any).MercadoPago('TEST-tu-public-key-aqui', {
-                  locale: 'es-AR'
-                });
-
-                mp.bricks().create('wallet', 'wallet_container', {
-                  initialization: {
-                    preferenceId: preferenceId
-                  },
-                  customization: {
-                    visual: {
-                      buttonBackground: '#FF6B00',
-                      buttonText: 'Pagar ahora'
-                    }
-                  }
-                });
-
-                setShowMercadoPagoModal(true);
+              if (preferenceId && initPoint) {
+                // Redirigir directamente a Mercado Pago Checkout Pro
+                window.location.href = initPoint;
               }
             } catch (err) {
               console.error('Error creating preference:', err);
-              // Fallback to simulation if Mercado Pago fails
-              setShowMercadoPagoModal(true);
-              setTimeout(() => {
-                setTimeout(() => {
-                  setShowMercadoPagoModal(false);
-                  confirmOrder();
-                }, 1500);
-              }, 2000);
+              alert('Hubo un error al iniciar el pago con Mercado Pago. Por favor intentá de nuevo.');
             }
 
             return;
@@ -141,45 +118,7 @@ const Menu = () => {
             );
           }
 
-          // Mercado Pago Modal - Transferencia
-            if (showMercadoPagoModal) {
-              return (
-                <div className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4">
-                  <div className="bg-white rounded-3xl p-8 max-w-md w-full text-center shadow-2xl">
-                    <h3 className="text-2xl font-black text-gray-800 mb-2">💳 Pago con Mercado Pago</h3>
-
-                    <div className="bg-blue-50 rounded-2xl p-4 mb-4">
-                      <p className="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">Total a pagar:</p>
-                      <p className="text-3xl font-black text-blue-700">${total()}</p>
-                    </div>
-
-                    <div id="wallet_container" className="mb-4"></div>
-
-                    <button 
-                      onClick={() => {
-                        // Simulate payment for testing
-                                  setTimeout(() => {
-                          setTimeout(() => {
-                            setShowMercadoPagoModal(false);
-                            confirmOrder();
-                          }, 1500);
-                        }, 2000);
-                      }}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white py-4 rounded-2xl font-black uppercase tracking-widest text-sm transition-all shadow-lg"
-                    >
-                      ✅ Simular pago (Testing)
-                    </button>
-
-                    <button 
-                      onClick={() => setShowMercadoPagoModal(false)}
-                      className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-3 rounded-2xl font-bold text-sm transition-all mt-2"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
-                </div>
-              );
-            }
+          // El modal de Mercado Pago ha sido reemplazado por redirección directa.
 
           const filteredCategories = local.categorias.map((cat: any) => ({
     ...cat,
@@ -327,7 +266,7 @@ const Menu = () => {
       {/* Cart Modal */}
             {isCartOpen && (
               <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-gray-900/100 w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[80vh] rounded-t-[3rem] sm:rounded-[2.5rem] flex flex-col overflow-hidden border-t border-white/20 sm:border border-white/20 shadow-[0_0_100px_rgba(0,0,0,0.8)] opacity-100">
+          <div className="bg-gray-900/100 w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[90vh] rounded-t-[3rem] sm:rounded-[2.5rem] flex flex-col overflow-y-auto border-t border-white/20 sm:border border-white/20 shadow-[0_0_100px_rgba(0,0,0,0.8)] opacity-100">
             <div className="p-8 border-b border-white/5 flex justify-between items-center">
               <h2 className="text-2xl font-black flex items-center gap-3">
                 <div className="p-2 bg-primary/10 rounded-xl">
