@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
 import { prisma } from './lib/prisma';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
@@ -10,23 +11,30 @@ import apiRoutes from './routes/api';
 
 const app = express();
 const httpServer = createServer(app);
+const FRONTEND_URL = process.env.FRONTEND_URL || '*';
+
 const io = new Server(httpServer, {
   cors: {
-    origin: "*", 
+    origin: FRONTEND_URL,
     methods: ["GET", "POST"]
   }
 });
 
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(cors({ origin: FRONTEND_URL }));
 app.use(express.json());
 
 // API Routes
 app.use('/api', apiRoutes);
 
-app.get('/', (req, res) => {
-  res.json({ message: 'MenuApp API is running' });
+// Serve frontend static files
+const distPath = path.join(__dirname, '../../MenuApp-Frontend/dist');
+app.use(express.static(distPath));
+
+// SPA fallback — all non-API routes return index.html
+app.get('*', (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 io.on('connection', (socket) => {

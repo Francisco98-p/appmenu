@@ -1,25 +1,22 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-interface AuthRequest extends Request {
-  user?: any;
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error('JWT_SECRET environment variable is required but not set');
 }
 
-export const authenticateToken = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticateToken = (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
 
-  console.log('Auth check - Token:', token ? 'present' : 'missing');
-  console.log('Auth check - Secret:', process.env.JWT_SECRET);
-
   if (!token) return res.status(401).json({ message: 'Access denied' });
 
-  jwt.verify(token, process.env.JWT_SECRET || 'secret_key', (err, user) => {
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
     if (err) {
-      console.log('JWT Verify Error:', err.message);
       return res.status(403).json({ message: 'Invalid token' });
     }
-    req.user = user;
+    req.user = decoded as Request['user'];
     next();
   });
 };
