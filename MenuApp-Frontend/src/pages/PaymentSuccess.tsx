@@ -1,19 +1,25 @@
 import { useEffect } from 'react';
-import { useNavigate, useSearchParams, Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { CheckCircle } from 'lucide-react';
+import { useCartStore } from '../context/cartStore';
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
-  useSearchParams();
+  const clearCart = useCartStore((state) => state.clearCart);
+
+  const slug = sessionStorage.getItem('menuSlug');
+  const menuPath = slug ? `/m/${slug}` : '/demo';
 
   useEffect(() => {
-    // Auto redirect to menu after 5 seconds
+    clearCart();
+    sessionStorage.removeItem('lastOrderId');
+
     const timer = setTimeout(() => {
-      navigate('/');
+      navigate(menuPath);
     }, 5000);
 
     return () => clearTimeout(timer);
-  }, [navigate]);
+  }, [navigate, clearCart, menuPath]);
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-6 text-center">
@@ -24,20 +30,20 @@ const PaymentSuccess = () => {
       <p className="text-gray-400 max-w-sm mb-10 font-medium leading-relaxed">
         Tu pago fue procesado correctamente. Serás redirigido al menú en unos segundos...
       </p>
-      <button 
-        onClick={() => navigate('/')}
+      <button
+        onClick={() => navigate(menuPath)}
         className="bg-primary hover:bg-primary-dark text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-primary/20"
       >
-                Volver al Menú
-              </button>
-              <Link 
-                to="/status"
-                className="mt-4 text-primary hover:text-primary-dark font-bold"
-              >
-                Consultar estado del pedido
-              </Link>
-            </div>
-          );
-        };
+        Volver al Menú
+      </button>
+      <Link
+        to="/status"
+        className="mt-4 text-primary hover:text-primary-dark font-bold"
+      >
+        Consultar estado del pedido
+      </Link>
+    </div>
+  );
+};
 
 export default PaymentSuccess;

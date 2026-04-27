@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 
 export const getOrders = async (req: Request, res: Response) => {
-  const localId = (req as any).user.localId;
+  const localId = req.user?.localId;
 
   try {
     const orders = await prisma.order.findMany({
@@ -36,7 +36,7 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
 };
 
 export const getCategories = async (req: Request, res: Response) => {
-  const localId = (req as any).user.localId;
+  const localId = req.user?.localId;
   try {
     const categories = await prisma.category.findMany({
       where: { localId },
@@ -83,7 +83,7 @@ export const updateOrderPaymentStatus = async (req: Request, res: Response) => {
 };
 
 export const getLocalSettings = async (req: Request, res: Response) => {
-  const localId = (req as any).user.localId;
+  const localId = req.user?.localId;
   
   try {
     const local = await prisma.local.findUnique({
@@ -103,7 +103,7 @@ export const getLocalSettings = async (req: Request, res: Response) => {
 };
 
 export const updateLocalSettings = async (req: Request, res: Response) => {
-  const localId = (req as any).user.localId;
+  const localId = req.user?.localId;
   const { nombre, logo, cbuAlias, mercadoPagoLink } = req.body;
   
   try {
@@ -118,7 +118,7 @@ export const updateLocalSettings = async (req: Request, res: Response) => {
 };
 
 export const getAdminProducts = async (req: Request, res: Response) => {
-  const localId = (req as any).user.localId;
+  const localId = req.user?.localId;
   try {
     const products = await prisma.product.findMany({
       where: { categoria: { localId } },

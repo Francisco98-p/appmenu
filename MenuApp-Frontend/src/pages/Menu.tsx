@@ -3,20 +3,20 @@ import { useParams } from 'react-router-dom';
 import { ShoppingCart, Search, Plus, Minus, X, Utensils, CheckCircle, ArrowRight } from 'lucide-react';
 import api from '../api/axios';
 import { useCartStore } from '../context/cartStore';
+import type { Local, PaymentMethod } from '../types';
 
 const Menu = () => {
-  const { slug } = useParams();
-  const [local, setLocal] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-    const [isCartOpen, setIsCartOpen] = useState(false);
-    const [selectedTableNum, setSelectedTableNum] = useState<string>('');
-    const [isOrderSuccess, setIsOrderSuccess] = useState(false);
-    const [placingOrder, setPlacingOrder] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'MercadoPago'>('Efectivo');
-// Removido showMercadoPagoModal ya que usamos redirección directa
+  const { slug } = useParams<{ slug: string }>();
+  const [local, setLocal] = useState<Local | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedTableNum, setSelectedTableNum] = useState<string>('');
+  const [isOrderSuccess, setIsOrderSuccess] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('Efectivo');
 
   const { items, addItem, removeItem, total, clearCart } = useCartStore();
 
@@ -37,68 +37,69 @@ const Menu = () => {
     fetchMenu();
   }, [slug]);
 
+  const createOrder = async (estado: string): Promise<number> => {
+    const response = await api.post('/orders', {
+      localId: local!.id,
+      mesa: selectedTableNum,
+      metodoPago: paymentMethod,
+      total: total(),
+      estado,
+      items: items.map(item => ({
+        productId: item.productId,
+        cantidad: item.cantidad,
+        precioUnitario: item.precio,
+        aclaracion: ''
+      }))
+    });
+    return response.data.id;
+  };
+
   const handlePlaceOrder = async () => {
-      if (!selectedTableNum) {
-        alert('Por favor elegí una mesa para continuar.');
+    if (!selectedTableNum) {
+      alert('Por favor elegí una mesa para continuar.');
+      return;
+    }
+
+    setPlacingOrder(true);
+    try {
+      if (paymentMethod === 'MercadoPago') {
+        // Create a pending order first so it exists in DB before redirect
+        const orderId = await createOrder('Pendiente');
+
+        const preferenceResponse = await api.post('/payment/create-preference', {
+          items: items.map(item => ({
+            nombre: item.nombre,
+            precioUnitario: item.precio,
+            cantidad: item.cantidad
+          })),
+          localId: local!.id,
+          orderId
+        });
+
+        const { initPoint } = preferenceResponse.data;
+        if (initPoint) {
+          // Save context for PaymentSuccess redirect
+          sessionStorage.setItem('menuSlug', slug || '');
+          sessionStorage.setItem('lastOrderId', String(orderId));
+          window.location.href = initPoint;
+        }
         return;
       }
 
-      // Simular sandbox de Mercado Pago
-          if (paymentMethod === 'MercadoPago') {
-            // Create preference and init Mercado Pago
-            try {
-              const preferenceResponse = await api.post('/payment/create-preference', {
-                items: items.map(item => ({
-                  nombre: item.nombre,
-                  precioUnitario: item.precio,
-                  cantidad: item.cantidad
-                })),
-                localId: local.id
-              });
-
-              const { preferenceId, initPoint } = preferenceResponse.data;
-
-              if (preferenceId && initPoint) {
-                // Redirigir directamente a Mercado Pago Checkout Pro
-                window.location.href = initPoint;
-              }
-            } catch (err) {
-              console.error('Error creating preference:', err);
-              alert('Hubo un error al iniciar el pago con Mercado Pago. Por favor intentá de nuevo.');
-            }
-
-            return;
-          }
-
-      confirmOrder();
-    };
-
-    const confirmOrder = async () => {
-      setPlacingOrder(true);
-      try {
-        await api.post('/orders', {
-          localId: local.id,
-          mesa: selectedTableNum,
-          metodoPago: paymentMethod,
-          total: total(),
-          items: items.map(item => ({
-            productId: item.productId,
-            cantidad: item.cantidad,
-            precioUnitario: item.precio,
-            aclaracion: ''
-          }))
-        });
-        setIsOrderSuccess(true);
-        clearCart();
-      } catch (err) {
-        alert('Error al enviar el pedido. Por favor intentá de nuevo.');
-      } finally {
-        setPlacingOrder(false);
-      }
-    };
+      // Cash payment — create order directly as Recibido
+      await createOrder('Recibido');
+      setIsOrderSuccess(true);
+      clearCart();
+    } catch (err) {
+      alert('Error al enviar el pedido. Por favor intentá de nuevo.');
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
 
   if (loading) return <div className="flex justify-center items-center h-screen bg-gray-950 text-white">Cargando menú...</div>;
   if (error) return <div className="flex justify-center items-center h-screen text-red-500 bg-gray-950">{error}</div>;
+  if (!local) return null;
 
   if (isOrderSuccess) {
     return (
@@ -117,8 +118,6 @@ const Menu = () => {
               </div>
             );
           }
-
-          // El modal de Mercado Pago ha sido reemplazado por redirección directa.
 
           const filteredCategories = local.categorias.map((cat: any) => ({
     ...cat,
@@ -203,13 +202,14 @@ const Menu = () => {
                 <div key={prod.id} className="group bg-gray-900/60 rounded-3xl overflow-hidden border border-white/5 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5">
                   <div className="relative h-48 overflow-hidden">
                     {prod.imagen ? (
-                      <img 
-                        src={prod.imagen} 
-                        alt={prod.nombre} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
+                      <img
+                        src={prod.imagen}
+                        alt={prod.nombre}
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400'; // Default food fallback
-                          (e.target as HTMLImageElement).onerror = null; // Prevent infinite loops
+                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=60&w=400';
+                          (e.target as HTMLImageElement).onerror = null;
                         }}
                       />
                     ) : (

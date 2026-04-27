@@ -9,7 +9,7 @@ const DemoLinks: React.FC = () => {
         {
             title: "Vista Cliente",
             description: "Accedé al menú digital como un cliente. Realizá pedidos y explorá el catálogo.",
-            url: "/m/sanjuan-gourmet",
+            url: "/m/chilligarden",
             icon: <User className="text-primary" size={32} />,
             color: "from-orange-500/20 to-primary/20",
             borderColor: "group-hover:border-primary/50"

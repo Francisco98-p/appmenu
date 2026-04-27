@@ -1,11 +1,6 @@
 import { create } from 'zustand';
-
-interface User {
-  id: number;
-  email: string;
-  rol: string;
-  local?: any;
-}
+import { persist, createJSONStorage } from 'zustand/middleware';
+import type { User } from '../types';
 
 interface AuthState {
   user: User | null;
@@ -14,17 +9,21 @@ interface AuthState {
   logout: () => void;
 }
 
-export const useAuthStore = create<AuthState>((set) => ({
-  user: JSON.parse(localStorage.getItem('user') || 'null'),
-  token: localStorage.getItem('token'),
-  login: (user, token) => {
-    localStorage.setItem('user', JSON.stringify(user));
-    localStorage.setItem('token', token);
-    set({ user, token });
-  },
-  logout: () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
-    set({ user: null, token: null });
-  },
-}));
+export const useAuthStore = create<AuthState>()(
+  persist(
+    (set) => ({
+      user: null,
+      token: null,
+      login: (user, token) => {
+        set({ user, token });
+      },
+      logout: () => {
+        set({ user: null, token: null });
+      },
+    }),
+    {
+      name: 'menuapp-auth',
+      storage: createJSONStorage(() => localStorage),
+    }
+  )
+);

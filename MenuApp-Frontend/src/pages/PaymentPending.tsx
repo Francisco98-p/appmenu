@@ -3,6 +3,8 @@ import { Clock } from 'lucide-react';
 
 const PaymentPending = () => {
   const navigate = useNavigate();
+  const slug = sessionStorage.getItem('menuSlug');
+  const menuPath = slug ? `/m/${slug}` : '/demo';
 
   return (
     <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-6 text-center">
@@ -13,8 +15,8 @@ const PaymentPending = () => {
       <p className="text-gray-400 max-w-sm mb-10 font-medium leading-relaxed">
         Tu pago está siendo procesado. Te notificaremos cuando se confirme.
       </p>
-      <button 
-        onClick={() => navigate('/')}
+      <button
+        onClick={() => navigate(menuPath)}
         className="bg-primary hover:bg-primary-dark text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-primary/20"
       >
         Volver al Menú
