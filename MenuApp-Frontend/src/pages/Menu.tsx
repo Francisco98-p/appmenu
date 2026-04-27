@@ -1,22 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { ShoppingCart, Search, Plus, Minus, X, Utensils, CheckCircle, ArrowRight } from 'lucide-react';
+import { ShoppingCart, Search, Plus, Minus, X, Utensils, CheckCircle, ArrowRight, Star, Clock, MapPin } from 'lucide-react';
 import api from '../api/axios';
 import { useCartStore } from '../context/cartStore';
 
 const Menu = () => {
   const { slug } = useParams();
   const [local, setLocal] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
-    const [isCartOpen, setIsCartOpen] = useState(false);
-    const [selectedTableNum, setSelectedTableNum] = useState<string>('');
-    const [isOrderSuccess, setIsOrderSuccess] = useState(false);
-    const [placingOrder, setPlacingOrder] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'MercadoPago'>('Efectivo');
-// Removido showMercadoPagoModal ya que usamos redirección directa
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [selectedTableNum, setSelectedTableNum] = useState<string>('');
+  const [isOrderSuccess, setIsOrderSuccess] = useState(false);
+  const [placingOrder, setPlacingOrder] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'MercadoPago'>('Efectivo');
 
   const { items, addItem, removeItem, total, clearCart } = useCartStore();
 
@@ -24,10 +23,10 @@ const Menu = () => {
     const fetchMenu = async () => {
       try {
         const response = await api.get(`/menu/${slug}`);
-                setLocal(response.data);
-                if (response.data.categorias.length > 0) {
-                  setSelectedCategory(response.data.categorias[0].id);
-                }
+        setLocal(response.data);
+        if (response.data.categorias.length > 0) {
+          setSelectedCategory(response.data.categorias[0].id);
+        }
       } catch (err) {
         setError('No se pudo cargar el menú. Verificá el enlace.');
       } finally {
@@ -38,89 +37,116 @@ const Menu = () => {
   }, [slug]);
 
   const handlePlaceOrder = async () => {
-      if (!selectedTableNum) {
-        alert('Por favor elegí una mesa para continuar.');
-        return;
-      }
+    if (!selectedTableNum) {
+      alert('Por favor elegí una mesa para continuar.');
+      return;
+    }
 
-      // Simular sandbox de Mercado Pago
-          if (paymentMethod === 'MercadoPago') {
-            // Create preference and init Mercado Pago
-            try {
-              const preferenceResponse = await api.post('/payment/create-preference', {
-                items: items.map(item => ({
-                  nombre: item.nombre,
-                  precioUnitario: item.precio,
-                  cantidad: item.cantidad
-                })),
-                localId: local.id
-              });
-
-              const { preferenceId, initPoint } = preferenceResponse.data;
-
-              if (preferenceId && initPoint) {
-                // Redirigir directamente a Mercado Pago Checkout Pro
-                window.location.href = initPoint;
-              }
-            } catch (err) {
-              console.error('Error creating preference:', err);
-              alert('Hubo un error al iniciar el pago con Mercado Pago. Por favor intentá de nuevo.');
-            }
-
-            return;
-          }
-
-      confirmOrder();
-    };
-
-    const confirmOrder = async () => {
-      setPlacingOrder(true);
+    if (paymentMethod === 'MercadoPago') {
       try {
-        await api.post('/orders', {
-          localId: local.id,
-          mesa: selectedTableNum,
-          metodoPago: paymentMethod,
-          total: total(),
+        const preferenceResponse = await api.post('/payment/create-preference', {
           items: items.map(item => ({
-            productId: item.productId,
-            cantidad: item.cantidad,
+            nombre: item.nombre,
             precioUnitario: item.precio,
-            aclaracion: ''
-          }))
+            cantidad: item.cantidad
+          })),
+          localId: local.id
         });
-        setIsOrderSuccess(true);
-        clearCart();
-      } catch (err) {
-        alert('Error al enviar el pedido. Por favor intentá de nuevo.');
-      } finally {
-        setPlacingOrder(false);
-      }
-    };
 
-  if (loading) return <div className="flex justify-center items-center h-screen bg-gray-950 text-white">Cargando menú...</div>;
-  if (error) return <div className="flex justify-center items-center h-screen text-red-500 bg-gray-950">{error}</div>;
+        const { initPoint } = preferenceResponse.data;
+        if (initPoint) {
+          window.location.href = initPoint;
+        }
+      } catch (err) {
+        console.error('Error creating preference:', err);
+        alert('Hubo un error al iniciar el pago con Mercado Pago.');
+      }
+      return;
+    }
+
+    confirmOrder();
+  };
+
+  const confirmOrder = async () => {
+    setPlacingOrder(true);
+    try {
+      await api.post('/orders', {
+        localId: local.id,
+        mesa: selectedTableNum,
+        metodoPago: paymentMethod,
+        total: total(),
+        items: items.map(item => ({
+          productId: item.productId,
+          cantidad: item.cantidad,
+          precioUnitario: item.precio,
+          aclaracion: ''
+        }))
+      });
+      setIsOrderSuccess(true);
+      clearCart();
+    } catch (err) {
+      alert('Error al enviar el pedido. Por favor intentá de nuevo.');
+    } finally {
+      setPlacingOrder(false);
+    }
+  };
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('es-AR', {
+      style: 'currency',
+      currency: 'ARS',
+      minimumFractionDigits: 0
+    }).format(price);
+  };
+
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-[#080B10] text-white">
+        <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+        <p className="font-bold tracking-widest text-xs uppercase animate-pulse">Cargando Experiencia...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-[#080B10] p-6 text-center">
+        <div className="w-20 h-20 bg-red-500/10 text-red-500 rounded-3xl flex items-center justify-center mb-6 border border-red-500/20">
+          <X size={40} />
+        </div>
+        <h2 className="text-2xl font-black text-white mb-2 uppercase italic">¡Ups! Algo salió mal</h2>
+        <p className="text-gray-400 font-medium">{error}</p>
+      </div>
+    );
+  }
 
   if (isOrderSuccess) {
     return (
-      <div className="min-h-screen bg-gray-950 flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-24 h-24 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-8 animate-bounce">
-          <CheckCircle size={48} />
+      <div className="min-h-screen bg-[#080B10] dot-grid flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full pointer-events-none"></div>
+        
+        <div className="relative z-10 animate-fade-up">
+          <div className="w-28 h-28 bg-green-500/10 text-green-500 rounded-[2.5rem] flex items-center justify-center mb-10 mx-auto border border-green-500/20 shadow-2xl shadow-green-500/10 animate-bounce-subtle">
+            <CheckCircle size={56} strokeWidth={1.5} />
+          </div>
+          <h2 className="text-5xl font-black text-white mb-4 italic uppercase tracking-tighter leading-none">
+            ¡Pedido <span className="gradient-text">Enviado!</span>
+          </h2>
+          <p className="text-gray-400 max-w-sm mb-12 font-medium leading-relaxed mx-auto text-lg">
+            Estamos preparando tu pedido de <span className="text-white font-bold">{local.nombre}</span> para la <span className="text-primary font-black uppercase">Mesa {selectedTableNum}</span>.
+          </p>
+          <button 
+            onClick={() => setIsOrderSuccess(false)}
+            className="shimmer-btn relative overflow-hidden bg-primary text-white px-12 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs transition-all active:scale-95 shadow-2xl shadow-primary/30"
+          >
+            Volver al Menú
+          </button>
         </div>
-        <h2 className="text-4xl font-black text-white mb-4 italic uppercase tracking-tighter">¡Pedido Recibido!</h2>
-        <p className="text-gray-400 max-w-sm mb-10 font-medium leading-relaxed">Estamos preparando lo mejor de **{local.nombre}** para servírtelo en la **Mesa {selectedTableNum}**.</p>
-        <button 
-          onClick={() => setIsOrderSuccess(false)}
-          className="bg-primary hover:bg-primary-dark text-white px-10 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-primary/20"
-        >
-                  Volver al Menú
-                </button>
-              </div>
-            );
-          }
+      </div>
+    );
+  }
 
-          // El modal de Mercado Pago ha sido reemplazado por redirección directa.
-
-          const filteredCategories = local.categorias.map((cat: any) => ({
+  const filteredCategories = local.categorias.map((cat: any) => ({
     ...cat,
     productos: cat.productos.filter((p: any) => 
       p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,38 +155,51 @@ const Menu = () => {
   })).filter((cat: any) => cat.productos.length > 0);
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-24 text-gray-100">
-      {/* Header */}
-      <div className="relative h-64 overflow-hidden">
+    <div className="min-h-screen bg-[#080B10] pb-32 text-gray-100 selection:bg-primary selection:text-white">
+      
+      {/* Hero Header */}
+      <div className="relative h-[420px] overflow-hidden">
         {local.logo && (
           <div className="absolute inset-0">
-            <img src={local.logo} alt="" className="w-full h-full object-cover opacity-30 blur-sm scale-110" />
-            <div className="absolute inset-0 bg-gradient-to-t from-gray-950 via-gray-950/60 to-transparent"></div>
+            <img src={local.logo} alt="" className="w-full h-full object-cover opacity-40 blur-[2px] scale-110" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#080B10]/40 to-transparent"></div>
           </div>
         )}
-        <div className="relative z-10 h-full flex flex-col justify-end p-6 max-w-4xl mx-auto w-full">
-          <div className="flex items-center gap-5">
+        
+        <div className="relative z-10 h-full flex flex-col justify-end p-8 max-w-5xl mx-auto w-full animate-fade-up">
+          <div className="flex flex-col sm:flex-row sm:items-end gap-6">
             {local.logo && (
-              <div className="p-1 bg-gradient-to-br from-primary to-orange-500 rounded-2xl shadow-2xl">
-                <img src={local.logo} alt={local.nombre} className="w-20 h-20 rounded-xl object-cover" />
+              <div className="p-1.5 bg-gradient-to-br from-primary to-accent rounded-[2.5rem] shadow-2xl w-fit animate-float">
+                <img src={local.logo} alt={local.nombre} className="w-24 h-24 sm:w-32 sm:h-32 rounded-[2.2rem] object-cover" />
               </div>
             )}
-            <div>
-              <h1 className="text-4xl font-black tracking-tight text-white mb-1 uppercase italic">{local.nombre}</h1>
-              <div className="flex items-center gap-2 text-primary font-medium text-sm">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 text-primary font-black text-[10px] uppercase tracking-[0.2em] mb-3">
                 <span className="w-2 h-2 bg-primary rounded-full animate-pulse"></span>
-                Abierto ahora • San Juan, Argentina
+                Abierto Ahora
+              </div>
+              <h1 className="text-5xl sm:text-7xl font-black tracking-tighter text-white mb-4 uppercase italic leading-none">{local.nombre}</h1>
+              <div className="flex flex-wrap items-center gap-4 text-gray-400 font-semibold text-sm">
+                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
+                  <MapPin size={14} className="text-primary" /> San Juan, Argentina
+                </span>
+                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
+                  <Star size={14} className="text-amber-400 fill-amber-400" /> 4.9 (Demo)
+                </span>
+                <span className="flex items-center gap-1.5 bg-white/5 px-3 py-1.5 rounded-xl border border-white/5">
+                  <Clock size={14} className="text-blue-400" /> 20-30 min
+                </span>
               </div>
             </div>
           </div>
           
-          <div className="mt-8 relative max-w-md">
-            <div className="glass rounded-2xl px-5 py-3 flex items-center gap-3 shadow-xl">
-              <Search size={20} className="text-gray-400" />
+          <div className="mt-12 relative max-w-lg">
+            <div className="glass-dark rounded-[2rem] px-6 py-4 flex items-center gap-4 shadow-2xl border border-white/10 group focus-within:border-primary/50 transition-all">
+              <Search size={22} className="text-gray-500 group-focus-within:text-primary transition-colors" />
               <input 
                 type="text" 
-                placeholder="¿Qué te gustaría comer?" 
-                className="bg-transparent border-none outline-none w-full placeholder:text-gray-500 text-sm font-medium"
+                placeholder="¿Qué te gustaría comer hoy?" 
+                className="bg-transparent border-none outline-none w-full placeholder:text-gray-600 text-base font-semibold text-white"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -169,20 +208,24 @@ const Menu = () => {
         </div>
       </div>
 
-      {/* Categories Tabs */}
-      <div className="sticky top-0 bg-gray-950/80 backdrop-blur-xl z-20 shadow-xl border-y border-white/5 overflow-x-auto no-scrollbar py-5 flex gap-4 px-6 justify-start md:justify-center">
+      {/* Categories Navigation */}
+      <div className="sticky top-0 bg-[#080B10]/80 backdrop-blur-2xl z-30 border-y border-white/5 overflow-x-auto no-scrollbar py-6 flex gap-3 px-8 justify-start md:justify-center animate-fade-up" style={{ animationDelay: '100ms' }}>
         {local.categorias.map((cat: any) => (
           <button
             key={cat.id}
             onClick={() => {
               setSelectedCategory(cat.id);
               const element = document.getElementById(`cat-${cat.id}`);
-              element?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              const yOffset = -100; 
+              if (element) {
+                const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+                window.scrollTo({top: y, behavior: 'smooth'});
+              }
             }}
-            className={`px-6 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all duration-300 ${
+            className={`px-8 py-3.5 rounded-2xl text-[11px] font-black uppercase tracking-[0.15em] transition-all duration-500 whitespace-nowrap ${
               selectedCategory === cat.id 
-                ? 'bg-primary text-white shadow-lg shadow-primary/20 scale-105' 
-                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                ? 'bg-primary text-white shadow-[0_15px_40px_rgba(255,77,28,0.3)] scale-105' 
+                : 'bg-white/5 text-gray-500 hover:bg-white/10 border border-white/5'
             }`}
           >
             {cat.nombre}
@@ -190,40 +233,52 @@ const Menu = () => {
         ))}
       </div>
 
-      {/* Product List */}
-      <div className="px-6 mt-10 space-y-12 max-w-4xl mx-auto">
-        {filteredCategories.map((cat: any) => (
-          <div key={cat.id} id={`cat-${cat.id}`} className="animate-in fade-in slide-in-from-bottom-5 duration-500">
-            <h2 className="text-2xl font-black mb-8 flex items-center gap-3">
-              <span className="w-8 h-1 bg-primary rounded-full"></span>
-              {cat.nombre}
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Menu Sections */}
+      <div className="px-8 mt-16 space-y-24 max-w-5xl mx-auto">
+        {filteredCategories.map((cat: any, idx: number) => (
+          <div key={cat.id} id={`cat-${cat.id}`} className="animate-fade-up" style={{ animationDelay: `${idx * 150}ms` }}>
+            <div className="flex items-center gap-6 mb-12">
+              <h2 className="text-3xl sm:text-4xl font-black uppercase italic tracking-tighter flex items-center gap-4">
+                <span className="w-12 h-[3px] bg-primary rounded-full"></span>
+                {cat.nombre}
+              </h2>
+              <span className="text-gray-600 font-bold text-sm bg-white/5 px-3 py-1 rounded-lg border border-white/5 uppercase tracking-widest">
+                {cat.productos.length} items
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
               {cat.productos.map((prod: any) => (
-                <div key={prod.id} className="group bg-gray-900/60 rounded-3xl overflow-hidden border border-white/5 hover:border-primary/30 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/5">
-                  <div className="relative h-48 overflow-hidden">
+                <div key={prod.id} className="group glass-dark rounded-[2.5rem] overflow-hidden border border-white/5 hover:border-primary/40 transition-all duration-700 hover:shadow-[0_40px_100px_rgba(0,0,0,0.5)] flex flex-col sm:flex-row h-full">
+                  <div className="relative w-full sm:w-[200px] h-[220px] sm:h-auto overflow-hidden shrink-0">
                     {prod.imagen ? (
-                      <img 
-                        src={prod.imagen} 
-                        alt={prod.nombre} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" 
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=400'; // Default food fallback
-                          (e.target as HTMLImageElement).onerror = null; // Prevent infinite loops
-                        }}
-                      />
+                      <>
+                        <img 
+                          src={prod.imagen} 
+                          alt={prod.nombre} 
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" 
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
+                      </>
                     ) : (
-                      <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-                        <Utensils className="text-white/20" size={48} />
+                      <div className="w-full h-full bg-gray-900 flex items-center justify-center">
+                        <Utensils className="text-white/10 animate-spin-slow" size={48} />
                       </div>
                     )}
-                    <div className="absolute top-4 right-4 glass px-3 py-1.5 rounded-xl font-black text-white shadow-lg">
-                      ${prod.precio}
+                    <div className="absolute bottom-4 left-4 price-badge">
+                      {formatPrice(prod.precio)}
                     </div>
                   </div>
-                  <div className="p-6">
-                    <h3 className="font-bold text-xl text-white mb-2 group-hover:text-primary transition-colors">{prod.nombre}</h3>
-                    <p className="text-sm text-gray-400 line-clamp-2 mb-6 leading-relaxed">{prod.descripcion}</p>
+                  
+                  <div className="p-8 flex flex-col flex-1">
+                    <div className="flex-1">
+                      <h3 className="font-black text-2xl text-white mb-3 group-hover:text-primary transition-colors leading-tight uppercase italic">{prod.nombre}</h3>
+                      <p className="text-sm text-gray-500 font-medium leading-relaxed mb-8 line-clamp-3 italic">
+                        {prod.descripcion || 'Sin descripción disponible.'}
+                      </p>
+                    </div>
+                    
                     <button 
                       onClick={() => addItem({
                         productId: prod.id,
@@ -232,9 +287,9 @@ const Menu = () => {
                         cantidad: 1,
                         imagen: prod.imagen
                       })}
-                      className="w-full bg-primary hover:bg-primary-dark text-white py-3.5 rounded-2xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg shadow-primary/20"
+                      className="w-full shimmer-btn relative overflow-hidden bg-white/5 hover:bg-primary text-gray-300 hover:text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-95 border border-white/5 hover:border-primary shadow-xl"
                     >
-                      <Plus size={18} /> AGREGAR AL CARRITO
+                      <Plus size={16} /> AGREGAR AL CARRITO
                     </button>
                   </div>
                 </div>
@@ -244,139 +299,159 @@ const Menu = () => {
         ))}
       </div>
 
-      {/* Floating Cart Button */}
+      {/* Floating Checkout Button */}
       {items.length > 0 && (
-        <button 
-          onClick={() => setIsCartOpen(true)}
-          className="fixed bottom-8 right-8 bg-orange-600 hover:bg-orange-700 text-white pl-6 pr-8 py-5 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] flex items-center gap-4 animate-bounce-subtle z-30 ring-4 ring-gray-950/50"
-        >
-          <div className="relative">
-            <ShoppingCart size={28} />
-            <span className="absolute -top-3 -right-3 bg-white text-orange-600 text-[11px] font-black px-2 py-1 rounded-lg shadow-xl">
-              {items.reduce((acc, i) => acc + i.cantidad, 0)}
-            </span>
-          </div>
-          <div className="text-left">
-            <p className="text-[10px] font-black uppercase tracking-tighter opacity-80 leading-none mb-1">Ver Pedido</p>
-            <p className="text-lg font-black leading-none">${total()}</p>
-          </div>
-        </button>
+        <div className="fixed bottom-10 left-0 right-0 z-40 px-8 pointer-events-none flex justify-center">
+          <button 
+            onClick={() => setIsCartOpen(true)}
+            className="pointer-events-auto bg-gradient-to-r from-primary to-orange-600 text-white px-8 py-5 rounded-[2.2rem] shadow-[0_30px_70px_rgba(0,0,0,0.8)] flex items-center gap-5 animate-bounce-cart ring-8 ring-[#080B10] group backdrop-blur-xl"
+          >
+            <div className="relative">
+              <div className="absolute -inset-2 bg-white/20 rounded-full animate-ping opacity-20"></div>
+              <ShoppingCart size={26} />
+              <span className="absolute -top-3 -right-3 bg-white text-primary text-[10px] font-black px-2 py-0.5 rounded-lg shadow-xl">
+                {items.reduce((acc, i) => acc + i.cantidad, 0)}
+              </span>
+            </div>
+            <div className="text-left">
+              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70 leading-none mb-1.5">Revisar Pedido</p>
+              <p className="text-xl font-black leading-none">{formatPrice(total())}</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform">
+              <ArrowRight size={20} />
+            </div>
+          </button>
+        </div>
       )}
 
-      {/* Cart Modal */}
-            {isCartOpen && (
-              <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-gray-900/100 w-full max-w-lg h-[90vh] sm:h-auto sm:max-h-[90vh] rounded-t-[3rem] sm:rounded-[2.5rem] flex flex-col overflow-y-auto border-t border-white/20 sm:border border-white/20 shadow-[0_0_100px_rgba(0,0,0,0.8)] opacity-100">
-            <div className="p-8 border-b border-white/5 flex justify-between items-center">
-              <h2 className="text-2xl font-black flex items-center gap-3">
-                <div className="p-2 bg-primary/10 rounded-xl">
-                  <ShoppingCart className="text-primary" />
+      {/* Full Screen Cart Modal */}
+      {isCartOpen && (
+        <div className="fixed inset-0 z-50 animate-in fade-in duration-300">
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" onClick={() => setIsCartOpen(false)}></div>
+          
+          <div className="absolute inset-y-0 right-0 w-full max-w-xl bg-[#080B10] flex flex-col shadow-[-40px_0_100px_rgba(0,0,0,0.8)] border-l border-white/5 animate-in slide-in-from-right duration-500">
+            
+            {/* Modal Header */}
+            <div className="p-8 sm:p-12 border-b border-white/5 flex justify-between items-center bg-black/20">
+              <div>
+                <div className="flex items-center gap-3 text-primary font-black text-[10px] uppercase tracking-[0.2em] mb-2">
+                  <ShoppingCart size={14} /> Tu Selección
                 </div>
-                Tu Carrito
-              </h2>
-              <button onClick={() => setIsCartOpen(false)} className="p-3 hover:bg-white/5 rounded-2xl text-gray-400 transition-colors">
-                <X size={24} />
+                <h2 className="text-4xl font-black text-white italic uppercase tracking-tighter leading-none">Carrito</h2>
+              </div>
+              <button 
+                onClick={() => setIsCartOpen(false)} 
+                className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center text-gray-400 hover:text-white transition-all active:scale-90 border border-white/5"
+              >
+                <X size={28} />
               </button>
             </div>
-            <div className="flex-1 overflow-y-auto p-8 space-y-6">
-              {items.map((item) => (
-                <div key={item.productId} className="flex items-center gap-5 group">
-                  <div className="w-20 h-20 rounded-2xl bg-gray-800 overflow-hidden flex-shrink-0">
-                    {item.imagen && <img src={item.imagen} alt={item.nombre} className="w-full h-full object-cover" />}
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-bold text-lg text-white group-hover:text-primary transition-colors">{item.nombre}</h4>
-                    <p className="text-primary font-black">${item.precio}</p>
-                  </div>
-                  <div className="flex items-center gap-4 bg-white/5 rounded-2xl p-2 border border-white/5">
-                    <button onClick={() => removeItem(item.productId)} className="w-8 h-8 flex items-center justify-center hover:bg-white/10 rounded-xl transition-colors"><Minus size={14} /></button>
-                    <span className="font-black text-lg min-w-[20px] text-center">{item.cantidad}</span>
-                    <button onClick={() => addItem(item)} className="w-8 h-8 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 rounded-xl transition-colors"><Plus size={14} /></button>
-                  </div>
+
+            {/* Cart Items */}
+            <div className="flex-1 overflow-y-auto p-8 sm:p-12 space-y-10 custom-scrollbar">
+              {items.length === 0 ? (
+                <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
+                  <Utensils size={80} className="mb-6" strokeWidth={1} />
+                  <p className="font-bold text-xl uppercase italic tracking-widest">El carrito está vacío</p>
                 </div>
-              ))}
+              ) : (
+                items.map((item) => (
+                  <div key={item.productId} className="flex items-center gap-6 group animate-fade-up">
+                    <div className="w-24 h-24 rounded-3xl bg-gray-900 overflow-hidden shrink-0 border border-white/5">
+                      {item.imagen && <img src={item.imagen} alt={item.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />}
+                    </div>
+                    <div className="flex-1">
+                      <h4 className="font-black text-xl text-white uppercase italic tracking-tight mb-2 group-hover:text-primary transition-colors">{item.nombre}</h4>
+                      <p className="text-primary font-black text-lg">{formatPrice(item.precio)}</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-2">
+                       <div className="flex items-center gap-4 bg-white/5 rounded-2xl p-2 border border-white/10">
+                        <button onClick={() => removeItem(item.productId)} className="w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-xl transition-colors"><Minus size={16} /></button>
+                        <span className="font-black text-xl min-w-[24px] text-center text-white">{item.cantidad}</span>
+                        <button onClick={() => addItem(item)} className="w-10 h-10 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 rounded-xl transition-colors"><Plus size={16} /></button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-            <div className="p-8 border-t border-white/5 bg-black/20">
+
+            {/* Modal Footer */}
+            <div className="p-8 sm:p-12 bg-black/40 border-t border-white/5 space-y-10">
+              
               {/* Table Selection */}
-              <div className="mb-8">
-                <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-3">Elegí tu mesa</p>
-                <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+              <div>
+                <p className="text-gray-500 text-[10px] font-black uppercase tracking-[0.2em] mb-5">Elegí tu mesa</p>
+                <div className="flex gap-3 overflow-x-auto no-scrollbar pb-2">
                   {local.mesas && local.mesas.map((mesa: any) => (
                     <button 
                       key={mesa.id}
                       onClick={() => setSelectedTableNum(mesa.numero)}
-                      className={`flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center font-black transition-all border ${
+                      className={`shrink-0 w-16 h-16 rounded-2xl flex items-center justify-center font-black text-xl transition-all border-2 ${
                         selectedTableNum === mesa.numero 
-                        ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105 select-none' 
-                        : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'
+                        ? 'bg-primary border-primary text-white shadow-2xl shadow-primary/30 scale-110' 
+                        : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10'
                       }`}
                     >
                       {mesa.numero}
                     </button>
                   ))}
-                  {(!local.mesas || local.mesas.length === 0) && (
-                    <p className="text-gray-600 text-[10px] font-bold">No hay mesas configuradas.</p>
+                </div>
+              </div>
+
+              {/* Payment Methods */}
+              <div className="grid grid-cols-2 gap-4">
+                <button 
+                  onClick={() => setPaymentMethod('Efectivo')}
+                  className={`flex items-center justify-center gap-3 py-5 rounded-[1.8rem] border-2 transition-all font-black text-xs uppercase tracking-widest ${
+                    paymentMethod === 'Efectivo' 
+                    ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
+                    : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                  }`}
+                >
+                  💵 Efectivo
+                </button>
+                <button 
+                  onClick={() => setPaymentMethod('MercadoPago')}
+                  className={`flex items-center justify-center gap-3 py-5 rounded-[1.8rem] border-2 transition-all font-black text-xs uppercase tracking-widest ${
+                    paymentMethod === 'MercadoPago' 
+                    ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
+                    : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                  }`}
+                >
+                  📱 Mercado Pago
+                </button>
+              </div>
+
+              {/* Final Checkout */}
+              <div className="space-y-6">
+                <div className="flex justify-between items-end">
+                  <p className="text-gray-500 text-sm font-bold uppercase tracking-widest">Total a pagar</p>
+                  <p className="text-5xl font-black text-white italic tracking-tighter leading-none">{formatPrice(total())}</p>
+                </div>
+
+                <button 
+                  disabled={placingOrder || items.length === 0}
+                  onClick={handlePlaceOrder}
+                  className={`w-full py-7 rounded-[2.5rem] font-black text-lg tracking-[0.15em] transition-all duration-500 flex items-center justify-center gap-5 shimmer-btn relative overflow-hidden ${
+                    placingOrder || items.length === 0
+                    ? 'bg-gray-800 text-gray-600 cursor-not-allowed opacity-50' 
+                    : 'bg-gradient-to-r from-primary to-orange-600 text-white shadow-[0_25px_60px_rgba(255,77,28,0.4)] hover:scale-[1.02] active:scale-95'
+                  }`}
+                >
+                  {placingOrder ? (
+                    <div className="flex items-center gap-4">
+                      <div className="w-6 h-6 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
+                      <span>ENVIANDO...</span>
+                    </div>
+                  ) : (
+                    <>
+                      <span>CONFIRMAR PEDIDO</span>
+                      <ArrowRight size={24} />
+                    </>
                   )}
-                </div>
+                </button>
               </div>
-
-              <div className="flex justify-between items-end mb-8">
-                <div>
-                  <p className="text-gray-400 text-sm font-medium mb-1">Total del pedido</p>
-                  <p className="text-4xl font-black text-white leading-none">${total()}</p>
-                </div>
-              </div>
-
-              {/* Payment Method selection */}
-              <div className="mb-8">
-                <p className="text-gray-400 text-xs font-black uppercase tracking-widest mb-3">¿Cómo vas a pagar?</p>
-                <div className="flex gap-4">
-                  <button 
-                    onClick={() => setPaymentMethod('Efectivo')}
-                    className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-2xl border transition-all font-bold ${
-                      paymentMethod === 'Efectivo' 
-                      ? 'bg-primary/10 border-primary text-primary shadow-lg shadow-primary/5' 
-                      : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'
-                    }`}
-                  >
-                    💵 Efectivo
-                  </button>
-                  <button 
-                                      onClick={() => setPaymentMethod('MercadoPago')}
-                                      className={`flex-1 flex items-center justify-center gap-3 p-4 rounded-2xl border transition-all font-bold ${
-                                        paymentMethod === 'MercadoPago' 
-                                        ? 'bg-primary/10 border-primary text-primary shadow-lg shadow-primary/5' 
-                                        : 'bg-white/5 border-white/10 text-gray-500 hover:bg-white/10'
-                                      }`}
-                                    >
-                                      📱 Mercado Pago
-                                    </button>
-                </div>
-              </div>
-              <button 
-                disabled={placingOrder}
-                className={`w-full py-6 rounded-[2.5rem] font-black text-xl tracking-widest shadow-[0_20px_50px_rgba(234,88,12,0.3)] transition-all duration-500 flex items-center justify-center gap-4 group relative overflow-hidden ${
-                  placingOrder 
-                  ? 'bg-gray-800 text-gray-500 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-primary to-orange-600 text-white hover:scale-[1.02] active:scale-95 hover:shadow-[0_25px_60px_rgba(234,88,12,0.4)]'
-                }`}
-                onClick={handlePlaceOrder}
-              >
-                {/* Shine effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                
-                {placingOrder ? (
-                  <div className="flex items-center gap-3">
-                    <div className="w-5 h-5 border-3 border-white/20 border-t-white rounded-full animate-spin"></div>
-                    <span>ENVIANDO...</span>
-                  </div>
-                ) : (
-                  <>
-                    <span>CONFIRMAR PEDIDO</span>
-                    <ArrowRight className="group-hover:translate-x-1 transition-transform" size={24} />
-                  </>
-                )}
-              </button>
             </div>
           </div>
         </div>

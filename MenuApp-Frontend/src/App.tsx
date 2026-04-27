@@ -29,7 +29,7 @@ function App() {
           <Route path="/success" element={<PaymentSuccess />} />
           <Route path="/failure" element={<PaymentFailure />} />
           <Route path="/pending" element={<PaymentPending />} />
-          <Route path="/status" element={<OrderStatus />} />
+          <Route path="/status/:orderId" element={<OrderStatus />} />
 
           {/* Admin Routes */}
         <Route path="/admin/login" element={<Login />} />
