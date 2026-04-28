@@ -347,87 +347,93 @@ const Menu = () => {
               </button>
             </div>
 
-            {/* Cart Items */}
-            <div className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-6 sm:space-y-8 custom-scrollbar">
-              {items.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-center opacity-40">
-                  <Utensils size={60} sm:size={80} className="mb-4 sm:mb-6" strokeWidth={1} />
-                  <p className="font-bold text-lg sm:text-xl uppercase italic tracking-widest">El carrito está vacío</p>
-                </div>
-              ) : (
-                items.map((item) => (
-                  <div key={item.productId} className="flex items-center gap-4 sm:gap-6 group animate-fade-up">
-                    <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-gray-900 overflow-hidden shrink-0 border border-white/5">
-                      {item.imagen && <img src={item.imagen} alt={item.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />}
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-black text-base sm:text-xl text-white uppercase italic tracking-tight mb-1 sm:mb-2 group-hover:text-primary transition-colors">{item.nombre}</h4>
-                      <p className="text-primary font-black text-sm sm:text-lg">{formatPrice(item.precio)}</p>
-                    </div>
-                    <div className="flex flex-col items-center gap-2">
-                       <div className="flex items-center gap-3 sm:gap-4 bg-white/5 rounded-xl sm:rounded-2xl p-1.5 sm:p-2 border border-white/10">
-                        <button onClick={() => removeItem(item.productId)} className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-white/10 rounded-lg sm:rounded-xl transition-colors"><Minus size={14} /></button>
-                        <span className="font-black text-base sm:text-xl min-w-[20px] text-center text-white">{item.cantidad}</span>
-                        <button onClick={() => addItem(item)} className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 rounded-lg sm:rounded-xl transition-colors"><Plus size={14} /></button>
+            {/* Cart Items & Selections */}
+            <div className="flex-1 overflow-y-auto p-6 sm:p-10 space-y-8 sm:space-y-10 custom-scrollbar">
+              <div className="space-y-6 sm:space-y-8">
+                {items.length === 0 ? (
+                  <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-10">
+                    <Utensils size={60} sm:size={80} className="mb-4 sm:mb-6" strokeWidth={1} />
+                    <p className="font-bold text-lg sm:text-xl uppercase italic tracking-widest">El carrito está vacío</p>
+                  </div>
+                ) : (
+                  items.map((item) => (
+                    <div key={item.productId} className="flex items-center gap-4 sm:gap-6 group animate-fade-up">
+                      <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl bg-gray-900 overflow-hidden shrink-0 border border-white/5">
+                        {item.imagen && <img src={item.imagen} alt={item.nombre} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-black text-base sm:text-xl text-white uppercase italic tracking-tight mb-1 sm:mb-2 group-hover:text-primary transition-colors">{item.nombre}</h4>
+                        <p className="text-primary font-black text-sm sm:text-lg">{formatPrice(item.precio)}</p>
+                      </div>
+                      <div className="flex flex-col items-center gap-2">
+                         <div className="flex items-center gap-3 sm:gap-4 bg-white/5 rounded-xl sm:rounded-2xl p-1.5 sm:p-2 border border-white/10">
+                          <button onClick={() => removeItem(item.productId)} className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center hover:bg-white/10 rounded-lg sm:rounded-xl transition-colors"><Minus size={14} /></button>
+                          <span className="font-black text-base sm:text-xl min-w-[20px] text-center text-white">{item.cantidad}</span>
+                          <button onClick={() => addItem(item)} className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center bg-primary/10 text-primary hover:bg-primary/20 rounded-lg sm:rounded-xl transition-colors"><Plus size={14} /></button>
+                        </div>
                       </div>
                     </div>
+                  ))
+                )}
+              </div>
+
+              {/* Selections (Only if items exist) */}
+              {items.length > 0 && (
+                <div className="space-y-8 sm:space-y-10 pt-6 sm:pt-8 border-t border-white/5">
+                  {/* Table Selection */}
+                  <div>
+                    <p className="text-gray-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-3 sm:mb-5">Elegí tu mesa</p>
+                    <div className="flex flex-wrap gap-2 sm:grid sm:grid-cols-4 sm:gap-3">
+                      {local.mesas && local.mesas.map((mesa: any) => (
+                        <button
+                          key={mesa.id}
+                          onClick={() => setSelectedTableNum(mesa.numero)}
+                          className={`flex-1 min-w-[70px] sm:min-w-0 py-3 sm:py-4 px-2 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-sm sm:text-lg truncate ${
+                            selectedTableNum === mesa.numero
+                              ? 'border-primary bg-primary/10 text-primary shadow-[0_0_20px_rgba(255,107,0,0.2)]'
+                              : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/10'
+                          }`}
+                          title={mesa.numero}
+                        >
+                          {mesa.numero}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                ))
+
+                  {/* Payment Methods */}
+                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                    <button 
+                      onClick={() => setPaymentMethod('Efectivo')}
+                      className={`flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-5 rounded-2xl sm:rounded-[1.8rem] border-2 transition-all font-black text-[9px] sm:text-xs uppercase tracking-widest ${
+                        paymentMethod === 'Efectivo' 
+                        ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
+                        : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                      }`}
+                    >
+                      💵 Efectivo
+                    </button>
+                    <button 
+                      onClick={() => setPaymentMethod('MercadoPago')}
+                      className={`flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-5 rounded-2xl sm:rounded-[1.8rem] border-2 transition-all font-black text-[9px] sm:text-xs uppercase tracking-widest ${
+                        paymentMethod === 'MercadoPago' 
+                        ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
+                        : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                      }`}
+                    >
+                      📱 M. Pago
+                    </button>
+                  </div>
+                </div>
               )}
             </div>
 
-            {/* Modal Footer */}
-            <div className="p-6 sm:p-10 bg-black/40 border-t border-white/5 space-y-6 sm:space-y-10">
-              
-              {/* Table Selection */}
-              <div>
-                <p className="text-gray-500 text-[9px] sm:text-[10px] font-black uppercase tracking-[0.2em] mb-3 sm:mb-5">Elegí tu mesa</p>
-                <div className="flex gap-2 sm:gap-3 overflow-x-auto no-scrollbar pb-1 sm:pb-2">
-                  {local.mesas && local.mesas.map((mesa: any) => (
-                    <button 
-                      key={mesa.id}
-                      onClick={() => setSelectedTableNum(mesa.numero)}
-                      className={`shrink-0 w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl flex items-center justify-center font-black text-base sm:text-xl transition-all border-2 ${
-                        selectedTableNum === mesa.numero 
-                        ? 'bg-primary border-primary text-white shadow-xl shadow-primary/30 scale-110' 
-                        : 'bg-white/5 border-white/5 text-gray-500 hover:bg-white/10'
-                      }`}
-                    >
-                      {mesa.numero}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Payment Methods */}
-              <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <button 
-                  onClick={() => setPaymentMethod('Efectivo')}
-                  className={`flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-5 rounded-2xl sm:rounded-[1.8rem] border-2 transition-all font-black text-[9px] sm:text-xs uppercase tracking-widest ${
-                    paymentMethod === 'Efectivo' 
-                    ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
-                    : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
-                  }`}
-                >
-                  💵 Efectivo
-                </button>
-                <button 
-                  onClick={() => setPaymentMethod('MercadoPago')}
-                  className={`flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-5 rounded-2xl sm:rounded-[1.8rem] border-2 transition-all font-black text-[9px] sm:text-xs uppercase tracking-widest ${
-                    paymentMethod === 'MercadoPago' 
-                    ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
-                    : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
-                  }`}
-                >
-                  📱 M. Pago
-                </button>
-              </div>
-
-              {/* Final Checkout */}
+            {/* Modal Footer (Fixed at bottom) */}
+            <div className="p-6 sm:p-10 bg-black/40 border-t border-white/5 shrink-0">
               <div className="space-y-4 sm:space-y-6">
-                <div className="flex justify-between items-end">
-                  <p className="text-gray-500 text-[10px] sm:text-sm font-bold uppercase tracking-widest leading-none mb-1">Total</p>
-                  <p className="text-3xl sm:text-5xl font-black text-white italic tracking-tighter leading-none">{formatPrice(total())}</p>
+                <div className="flex justify-between items-end mb-4 sm:mb-6">
+                  <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Total</span>
+                  <span className="text-3xl sm:text-4xl font-black text-white italic tracking-tighter leading-none">{formatPrice(total())}</span>
                 </div>
 
                 <button 
