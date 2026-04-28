@@ -11,7 +11,8 @@ const AdminDashboard = () => {
   const [selectedTable, setSelectedTable] = useState<string | null>(null);
   const [allTables, setAllTables] = useState<any[]>([]);
   const [newTableNum, setNewTableNum] = useState('');
-    const [activeTab, setActiveTab] = useState<'salon' | 'config' | 'stock'>('salon');
+  const [activeTab, setActiveTab] = useState<'salon' | 'config' | 'stock'>('salon');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [products, setProducts] = useState<any[]>([]);
     const [categories, setCategories] = useState<any[]>([]);
     const [kitchens, setKitchens] = useState<any[]>([]);
@@ -292,8 +293,26 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 flex font-sans">
-      {/* Sidebar - Same as before */}
-      <aside className="w-72 bg-gray-900 border-r border-white/5 flex flex-col fixed inset-y-0 z-30 shadow-2xl">
+      {/* Mobile Sidebar Toggle */}
+      <div className="lg:hidden fixed top-4 left-4 z-40">
+        <button 
+          onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+          className="p-3 bg-gray-900 border border-white/10 rounded-xl text-primary shadow-2xl"
+        >
+          {isSidebarOpen ? <X size={24} /> : <LayoutDashboard size={24} />}
+        </button>
+      </div>
+
+      {/* Sidebar Overlay */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 lg:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        ></div>
+      )}
+
+      {/* Sidebar */}
+      <aside className={`w-72 bg-gray-900 border-r border-white/5 flex flex-col fixed inset-y-0 z-40 shadow-2xl transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
         <div className="p-8 pb-10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
@@ -309,21 +328,21 @@ const AdminDashboard = () => {
         <nav className="flex-1 px-4 space-y-2 mt-2">
           <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] px-4 mb-4">Gestión de Salón</div>
           <button 
-            onClick={() => setActiveTab('salon')}
+            onClick={() => { setActiveTab('salon'); setIsSidebarOpen(false); }}
             className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border group ${activeTab === 'salon' ? 'bg-primary/10 text-primary border-primary/20' : 'text-gray-500 hover:text-white hover:bg-white/5 border-transparent'}`}
           >
             <LayoutDashboard size={22} className="group-hover:scale-110 transition-transform" />
             <span className="font-bold tracking-tight">Mesas Activas</span>
           </button>
           <button 
-            onClick={() => setActiveTab('stock')}
+            onClick={() => { setActiveTab('stock'); setIsSidebarOpen(false); }}
             className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border group ${activeTab === 'stock' ? 'bg-primary/10 text-primary border-primary/20' : 'text-gray-500 hover:text-white hover:bg-white/5 border-transparent'}`}
           >
             <Package size={22} className="group-hover:scale-110 transition-transform" />
             <span className="font-bold tracking-tight">Gestión Stock</span>
           </button>
           <button 
-            onClick={() => setActiveTab('config')}
+            onClick={() => { setActiveTab('config'); setIsSidebarOpen(false); }}
             className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all border group ${activeTab === 'config' ? 'bg-primary/10 text-primary border-primary/20' : 'text-gray-500 hover:text-white hover:bg-white/5 border-transparent'}`}
           >
             <Settings size={22} className="group-hover:scale-110 transition-transform" />
@@ -348,14 +367,14 @@ const AdminDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 ml-72 p-10 lg:p-14">
+      <main className="flex-1 lg:ml-72 p-6 sm:p-10 lg:p-14 pt-20 lg:pt-14">
         <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-5xl font-black text-white tracking-tighter">
+              <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tighter">
                 {activeTab === 'salon' ? 'Mesas' : activeTab === 'stock' ? 'Stock' : 'Config'}
               </h2>
-              <div className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-xs font-black uppercase tracking-widest border border-primary/20">
+              <div className="bg-primary/10 text-primary px-3 py-1 rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest border border-primary/20">
                 {activeTab === 'salon' ? 'Activas' : activeTab === 'stock' ? 'Inventario' : 'Ajustes'}
               </div>
             </div>
@@ -368,18 +387,18 @@ const AdminDashboard = () => {
         </header>
 
         {/* Improved Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-gray-900 border border-white/5 p-6 rounded-[2rem] shadow-xl">
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Mesas Abiertas</p>
-            <h3 className="text-3xl font-black text-white">{tableList.length}</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <div className="bg-gray-900 border border-white/5 p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-xl">
+            <p className="text-gray-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-1">Mesas Abiertas</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-white">{tableList.length}</h3>
           </div>
-          <div className="bg-gray-900 border border-white/5 p-6 rounded-[2rem] shadow-xl">
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Pedidos Totales</p>
-            <h3 className="text-3xl font-black text-white">{orders.length}</h3>
+          <div className="bg-gray-900 border border-white/5 p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-xl">
+            <p className="text-gray-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-1">Pedidos Totales</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-white">{orders.length}</h3>
           </div>
-          <div className="bg-gray-900 border border-white/5 p-6 rounded-[2rem] shadow-xl col-span-2">
-            <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest mb-1">Total por Cobrar</p>
-            <h3 className="text-3xl font-black text-primary">${Object.values(tables).reduce((acc: number, t: any) => acc + t.total, 0)}</h3>
+          <div className="bg-gray-900 border border-white/5 p-5 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-xl sm:col-span-2">
+            <p className="text-gray-500 text-[9px] sm:text-[10px] font-black uppercase tracking-widest mb-1">Total por Cobrar</p>
+            <h3 className="text-2xl sm:text-3xl font-black text-primary">${Object.values(tables).reduce((acc: number, t: any) => acc + t.total, 0)}</h3>
           </div>
         </div>
 
@@ -459,8 +478,8 @@ const AdminDashboard = () => {
         ) : activeTab === 'stock' ? (
           <div className="max-w-6xl">
             {/* Search and Filters */}
-            <div className="bg-gray-900 border border-white/5 p-6 rounded-[2rem] shadow-xl mb-10 flex flex-wrap items-center gap-6">
-              <div className="flex-1 min-w-[300px] relative">
+            <div className="bg-gray-900 border border-white/5 p-4 sm:p-6 rounded-2xl sm:rounded-[2rem] shadow-xl mb-8 sm:mb-10 flex flex-wrap items-center gap-4 sm:gap-6">
+              <div className="flex-1 min-w-[250px] relative">
                 <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
                 <input 
                   type="text" 
@@ -484,7 +503,7 @@ const AdminDashboard = () => {
 
                 <button 
                   onClick={() => setShowKitchenModal(true)}
-                  className="bg-white/5 hover:bg-white/10 text-gray-400 p-4 rounded-xl transition-all border border-white/5"
+                  className="bg-white/5 hover:bg-white/10 text-gray-400 p-4 rounded-xl transition-all border border-white/5 shrink-0"
                   title="Gestionar Cocinas"
                 >
                   <Utensils size={20} />
@@ -493,7 +512,7 @@ const AdminDashboard = () => {
 
               <button 
                 onClick={() => setShowNewProductModal(true)}
-                className="bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-primary/20 flex items-center gap-3 shrink-0"
+                className="w-full sm:w-auto bg-primary hover:bg-primary-dark text-white px-8 py-4 rounded-2xl font-black uppercase tracking-widest text-xs transition-all shadow-xl shadow-primary/20 flex items-center justify-center gap-3 shrink-0"
               >
                 <Plus size={18} /> Nuevo Producto
               </button>
@@ -549,8 +568,9 @@ const AdminDashboard = () => {
             </div>
 
             {/* Inventory Table */}
-            <div className="bg-gray-900 rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden">
-              <table className="w-full text-left border-collapse">
+            <div className="bg-gray-900 rounded-2xl sm:rounded-[2.5rem] border border-white/5 shadow-2xl overflow-hidden overflow-x-auto">
+              <div className="min-w-[800px]">
+                <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-black/40">
                     <th className="px-8 py-6 text-[10px] font-black text-gray-500 uppercase tracking-widest text-left">Producto</th>
@@ -629,13 +649,14 @@ const AdminDashboard = () => {
                   )}
                 </tbody>
               </table>
+              </div>
             </div>
           </div>
         ) : (
           <div className="max-w-4xl">
             {/* Configuración de Pagos */}
-            <div className="bg-gray-900 rounded-[2.5rem] p-10 border border-white/5 shadow-2xl mb-10">
-              <h3 className="text-2xl font-black text-white mb-6 italic uppercase tracking-tighter">Configuración de Pagos</h3>
+            <div className="bg-gray-900 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-white/5 shadow-2xl mb-8 sm:mb-10">
+              <h3 className="text-xl sm:text-2xl font-black text-white mb-6 italic uppercase tracking-tighter">Configuración de Pagos</h3>
               <form onSubmit={saveLocalSettings} className="space-y-6">
                 <div>
                   <label className="block text-gray-400 text-xs font-black uppercase tracking-widest mb-2">CBU o Alias para transferencias</label>
@@ -667,9 +688,9 @@ const AdminDashboard = () => {
             </div>
 
             {/* Configuración de Mesas */}
-            <div className="bg-gray-900 rounded-[2.5rem] p-10 border border-white/5 shadow-2xl mb-10">
-              <h3 className="text-2xl font-black text-white mb-6 italic uppercase tracking-tighter">Agregar Nueva Mesa</h3>
-              <form onSubmit={addTable} className="flex gap-4">
+            <div className="bg-gray-900 rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-10 border border-white/5 shadow-2xl mb-8 sm:mb-10">
+              <h3 className="text-xl sm:text-2xl font-black text-white mb-6 italic uppercase tracking-tighter">Agregar Nueva Mesa</h3>
+              <form onSubmit={addTable} className="flex flex-col sm:flex-row gap-4">
                 <input 
                   type="text" 
                   placeholder="Número de mesa (Ej: 1, 10, VIP-A)" 
@@ -708,20 +729,20 @@ const AdminDashboard = () => {
 
         {/* Table Detail Modal */}
         {selectedTable && (
-          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-6">
-            <div className="bg-gray-900 w-full max-w-4xl max-h-[90vh] rounded-[3.5rem] shadow-3xl border border-white/10 flex flex-col overflow-hidden">
-              <div className="p-10 border-b border-white/5 flex justify-between items-center bg-black/20">
-                <div className="flex items-center gap-6">
-                  <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/20">
-                    <h5 className="text-4xl font-black text-white italic">{selectedTable}</h5>
+          <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4 sm:p-6">
+            <div className="bg-gray-900 w-full max-w-4xl max-h-[90vh] rounded-[2rem] sm:rounded-[3.5rem] shadow-3xl border border-white/10 flex flex-col overflow-hidden">
+              <div className="p-6 sm:p-10 border-b border-white/5 flex justify-between items-center bg-black/20">
+                <div className="flex items-center gap-4 sm:gap-6">
+                  <div className="w-14 h-14 sm:w-20 sm:h-20 bg-primary rounded-2xl sm:rounded-3xl flex items-center justify-center shadow-2xl shadow-primary/20 shrink-0">
+                    <h5 className="text-2xl sm:text-4xl font-black text-white italic">{selectedTable}</h5>
                   </div>
                   <div>
-                    <h2 className="text-3xl font-black text-white tracking-tight">Detalle de Mesa</h2>
-                    <p className="text-gray-500 font-medium">Gestioná los pedidos y cerrá la cuenta.</p>
+                    <h2 className="text-xl sm:text-3xl font-black text-white tracking-tight">Detalle de Mesa</h2>
+                    <p className="hidden sm:block text-gray-500 font-medium">Gestioná los pedidos y cerrá la cuenta.</p>
                   </div>
                 </div>
-                <button onClick={() => setSelectedTable(null)} className="w-14 h-14 bg-white/5 hover:bg-white/10 rounded-2xl flex items-center justify-center transition-all">
-                  <X size={24} />
+                <button onClick={() => setSelectedTable(null)} className="w-10 h-10 sm:w-14 sm:h-14 bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center transition-all">
+                  <X size={20} />
                 </button>
               </div>
 
@@ -779,17 +800,17 @@ const AdminDashboard = () => {
                 ))}
               </div>
 
-              <div className="p-10 bg-black/40 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div>
-                  <p className="text-gray-500 text-xs font-black uppercase tracking-widest mb-1">Total Acumulado</p>
-                  <p className="text-5xl font-black text-primary tracking-tighter">${tables[selectedTable].total}</p>
+              <div className="p-6 sm:p-10 bg-black/40 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+                <div className="text-center sm:text-left">
+                  <p className="text-gray-500 text-[10px] sm:text-xs font-black uppercase tracking-widest mb-1">Total Acumulado</p>
+                  <p className="text-4xl sm:text-5xl font-black text-primary tracking-tighter leading-none">${tables[selectedTable].total}</p>
                 </div>
                 {tables[selectedTable].orders.length > 0 && (
                   <button 
                     onClick={() => closeTable(selectedTable)}
-                    className="w-full md:w-auto bg-green-500 hover:bg-green-600 text-white px-12 py-6 rounded-[2rem] font-black text-sm uppercase tracking-widest shadow-2xl shadow-green-500/20 transition-all active:scale-95 flex items-center justify-center gap-4"
+                    className="w-full sm:w-auto bg-green-500 hover:bg-green-600 text-white px-8 sm:px-12 py-5 sm:py-6 rounded-2xl sm:rounded-[2rem] font-black text-xs sm:text-sm uppercase tracking-widest shadow-2xl shadow-green-500/20 transition-all active:scale-95 flex items-center justify-center gap-3 sm:gap-4"
                   >
-                    <CheckCircle size={24} /> Cerrar Mesa y Cobrar
+                    <CheckCircle size={20} /> Cerrar Mesa y Cobrar
                   </button>
                 )}
               </div>
