@@ -21,7 +21,7 @@ async function main() {
     data: {
       nombre: 'Chilli Garden',
       slug: 'chilligarden',
-      logo: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=200&h=200',
+      logo: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=200&h=200', // Keep original or use a generic logo
       mercadoPagoLink: 'https://link.mercadopago.com.ar/chilligarden',
       cbuAlias: 'CHILLI.GARDEN.PAY',
     },
@@ -58,9 +58,9 @@ async function main() {
   });
   await prisma.product.createMany({
     data: [
-      { categoryId: catEntrada.id, nombre: 'Papas Fritas', descripcion: 'Porción clásica de papas fritas.', precio: 7500, imagen: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?q=80&w=600' },
-      { categoryId: catEntrada.id, nombre: 'Papas Chilli', descripcion: 'Papas Fritas con Huevo.', precio: 8000, imagen: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?q=80&w=600' },
-      { categoryId: catEntrada.id, nombre: 'Papas Cheddar y Panceta', descripcion: 'Papas Fritas con Cheddar, Panceta y verdeo.', precio: 9000, imagen: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?q=80&w=600' },
+      { categoryId: catEntrada.id, nombre: 'Papas Fritas', descripcion: 'Porción clásica de papas fritas.', precio: 7500, imagen: '/images/chilligarden/img19.jpeg' },
+      { categoryId: catEntrada.id, nombre: 'Papas Chilli', descripcion: 'Papas Fritas con Huevo.', precio: 8000, imagen: '/images/chilligarden/img5.jpeg' },
+      { categoryId: catEntrada.id, nombre: 'Papas Cheddar y Panceta', descripcion: 'Papas Fritas con Cheddar, Panceta y verdeo.', precio: 9000, imagen: '/images/chilligarden/img8.jpeg' },
     ],
   });
 
@@ -70,9 +70,9 @@ async function main() {
   });
   await prisma.product.createMany({
     data: [
-      { categoryId: catLomos.id, nombre: 'Lomo Especial', descripcion: 'Carne de lomo, jamón, queso tybo, huevo, tomate, lechuga y salsa casera.', precio: 22000, imagen: 'https://images.unsplash.com/photo-1558030006-450675393462?q=80&w=600' },
-      { categoryId: catLomos.id, nombre: 'Lomo Provolone', descripcion: 'Carne de lomo, queso provolone, rúcula, cebolla caramelizada y salsa casera.', precio: 23000, imagen: 'https://images.unsplash.com/photo-1558030006-450675393462?q=80&w=600' },
-      { categoryId: catLomos.id, nombre: 'Medio Lomo Especial', descripcion: 'Media porción del lomo especial completo.', precio: 16000, imagen: 'https://images.unsplash.com/photo-1558030006-450675393462?q=80&w=600' },
+      { categoryId: catLomos.id, nombre: 'Lomo Especial', descripcion: 'Carne de lomo, jamón, queso tybo, huevo, tomate, lechuga y salsa casera.', precio: 22000, imagen: '/images/chilligarden/img4.jpeg' },
+      { categoryId: catLomos.id, nombre: 'Lomo Provolone', descripcion: 'Carne de lomo, queso provolone, rúcula, cebolla caramelizada y salsa casera.', precio: 23000, imagen: '/images/chilligarden/img7.jpeg' },
+      { categoryId: catLomos.id, nombre: 'Medio Lomo Especial', descripcion: 'Media porción del lomo especial completo.', precio: 16000, imagen: '/images/chilligarden/img9.jpeg' },
     ],
   });
 
@@ -82,10 +82,10 @@ async function main() {
   });
   await prisma.product.createMany({
     data: [
-      { categoryId: catBurgers.id, nombre: 'Burger Cheese', descripcion: 'Pan de papa, carne smash, queso cheddar y ketchup.', precio: 13000, imagen: 'https://images.unsplash.com/photo-1550547660-d9450f859349?q=80&w=600' },
-      { categoryId: catBurgers.id, nombre: 'Burger Americana', descripcion: 'Pan de papa, carne smash, queso cheddar, cebolla, panceta y ketchup.', precio: 13000, imagen: 'https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?q=80&w=600' },
-      { categoryId: catBurgers.id, nombre: 'Burger Chilli', descripcion: 'Pan de papa, carne smash, queso provolone y guacamole picante.', precio: 13000, imagen: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?q=80&w=600' },
-      { categoryId: catBurgers.id, nombre: 'Burger Americana Doble', descripcion: 'Doble carne smash, cheddar, cebolla, panceta y ketchup.', precio: 15400, imagen: 'https://images.unsplash.com/photo-1586816001966-79b736744398?q=80&w=600' },
+      { categoryId: catBurgers.id, nombre: 'Burger Cheese', descripcion: 'Pan de papa, carne smash, queso cheddar y ketchup.', precio: 13000, imagen: '/images/chilligarden/img1.jpeg' },
+      { categoryId: catBurgers.id, nombre: 'Burger Americana', descripcion: 'Pan de papa, carne smash, queso cheddar, cebolla, panceta y ketchup.', precio: 13000, imagen: '/images/chilligarden/img16.jpeg' },
+      { categoryId: catBurgers.id, nombre: 'Burger Chilli', descripcion: 'Pan de papa, carne smash, queso provolone y guacamole picante.', precio: 13000, imagen: '/images/chilligarden/img2.jpeg' },
+      { categoryId: catBurgers.id, nombre: 'Burger Americana Doble', descripcion: 'Doble carne smash, cheddar, cebolla, panceta y ketchup.', precio: 15400, imagen: '/images/chilligarden/img17.jpeg' },
     ],
   });
 
@@ -95,8 +95,8 @@ async function main() {
   });
   await prisma.product.createMany({
     data: [
-      { categoryId: catEnsaladas.id, nombre: 'Ensalada Rústica', descripcion: 'Rúcula, lechuga, cherry, palta, queso provolone, crutones y mix de semillas.', precio: 12000, imagen: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=600' },
-      { categoryId: catEnsaladas.id, nombre: 'Ensalada Cheta', descripcion: 'Rúcula, zanahoria, repollo morado, pollo en tiras y mix de semillas.', precio: 12000, imagen: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?q=80&w=600' },
+      { categoryId: catEnsaladas.id, nombre: 'Ensalada Rústica', descripcion: 'Rúcula, lechuga, cherry, palta, queso provolone, crutones y mix de semillas.', precio: 12000, imagen: '/images/chilligarden/img12.jpeg' },
+      { categoryId: catEnsaladas.id, nombre: 'Ensalada Cheta', descripcion: 'Rúcula, zanahoria, repollo morado, pollo en tiras y mix de semillas.', precio: 12000, imagen: '/images/chilligarden/img10.jpeg' },
     ],
   });
 
