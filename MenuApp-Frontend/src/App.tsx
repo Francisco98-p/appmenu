@@ -10,6 +10,7 @@ const PaymentFailure = lazy(() => import('./pages/PaymentFailure'));
 const PaymentPending = lazy(() => import('./pages/PaymentPending'));
 const OrderStatus = lazy(() => import('./pages/OrderStatus'));
 const DemoLinks = lazy(() => import('./pages/DemoLinks'));
+const MozoDashboard = lazy(() => import('./pages/MozoDashboard'));
 
 const PageLoader = () => (
   <div className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -43,6 +44,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mozo/dashboard"
+            element={
+              <ProtectedRoute>
+                <MozoDashboard />
               </ProtectedRoute>
             }
           />

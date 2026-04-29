@@ -106,7 +106,11 @@ export const placeOrder = async (req: Request, res: Response) => {
           }))
         }
       },
-      include: { items: true }
+      include: { 
+        items: {
+          include: { producto: true }
+        }
+      }
     });
 
     // Notify administrators in real-time

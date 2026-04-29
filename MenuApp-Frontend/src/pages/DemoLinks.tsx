@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChefHat, LayoutDashboard, ArrowRight, Sparkles, Star, Zap } from 'lucide-react';
+import { ChefHat, LayoutDashboard, ArrowRight, Sparkles, Star, Zap, ClipboardList } from 'lucide-react';
 
 const DemoLinks: React.FC = () => {
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ const DemoLinks: React.FC = () => {
       </div>
 
       {/* Cards */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 w-full max-w-5xl">
 
         {/* Card Cliente */}
         <div
@@ -128,6 +128,48 @@ const DemoLinks: React.FC = () => {
               </div>
               <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-blue-500/10 border border-blue-500/20 group-hover:bg-blue-500 group-hover:border-blue-500 transition-all duration-300">
                 <ArrowRight className="text-blue-400 group-hover:text-white transition-colors" size={18} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card Mozo */}
+        <div
+          onClick={() => navigate('/admin/login')}
+          className="group relative glass rounded-[2rem] p-8 sm:p-10 cursor-pointer border border-white/8 overflow-hidden transition-all duration-500
+            hover:border-green-500/40 hover:shadow-[0_30px_80px_rgba(34,197,94,0.15)] hover:scale-[1.025]
+            animate-card-in"
+          style={{ animationDelay: '340ms' }}
+        >
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-green-600/10 to-emerald-700/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-[2rem]" />
+          {/* Top accent line */}
+          <div className="absolute top-0 left-8 right-8 h-[2px] bg-gradient-to-r from-transparent via-green-500/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+          <div className="relative z-10 flex flex-col h-full">
+            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-6 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6"
+              style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.2), rgba(16,185,129,0.15))', border: '1px solid rgba(34,197,94,0.3)' }}>
+              <ClipboardList className="text-green-400" size={30} />
+            </div>
+
+            <h2 className="text-2xl sm:text-3xl font-black text-white uppercase italic tracking-tight mb-3 flex items-center gap-3">
+              Vista Mozo
+              <ArrowRight className="text-gray-500 group-hover:text-green-400 group-hover:translate-x-1.5 transition-all duration-300" size={22} />
+            </h2>
+            <p className="text-gray-400 font-medium leading-relaxed text-sm flex-grow mb-8">
+              Visualizá mesas, pedidos activos y tomá <span className="text-green-300 font-semibold">nuevos pedidos</span> rápidamente desde el panel de salón.
+            </p>
+
+            <div className="flex items-center justify-between">
+              <div className="flex gap-1.5">
+                {['Salón', 'Pedidos', 'Mesas'].map(tag => (
+                  <span key={tag} className="text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/5 text-gray-500 border border-white/5">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-green-500/10 border border-green-500/20 group-hover:bg-green-500 group-hover:border-green-500 transition-all duration-300">
+                <ArrowRight className="text-green-400 group-hover:text-white transition-colors" size={18} />
               </div>
             </div>
           </div>

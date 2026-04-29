@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, ChefHat, Utensils, ArrowLeft, RotateCcw, Star, Sparkles } from 'lucide-react';
 import api from '../api/axios';
+import { io } from 'socket.io-client';
 
 const OrderStatus = () => {
   const { orderId } = useParams();
@@ -23,9 +24,28 @@ const OrderStatus = () => {
 
     if (orderId) {
       fetchOrder();
-      // Polling cada 15 segundos para ver cambios de estado
-      const interval = setInterval(fetchOrder, 15000);
-      return () => clearInterval(interval);
+
+      const socket = io(window.location.origin, {
+        reconnection: true,
+        reconnectionAttempts: 5,
+        reconnectionDelay: 1000,
+      });
+
+      socket.on('orderStatusUpdated', (updatedOrder) => {
+        if (updatedOrder.id.toString() === orderId.toString()) {
+          setOrder(updatedOrder);
+        }
+      });
+
+      socket.on('orderPaymentUpdated', (updatedOrder) => {
+        if (updatedOrder.id.toString() === orderId.toString()) {
+          setOrder(updatedOrder);
+        }
+      });
+
+      return () => {
+        socket.disconnect();
+      };
     }
   }, [orderId]);
 

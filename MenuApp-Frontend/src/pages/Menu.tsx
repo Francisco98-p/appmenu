@@ -1,21 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Search, Plus, Minus, X, Utensils, CheckCircle, ArrowRight, Star, Clock, MapPin } from 'lucide-react';
 import api from '../api/axios';
 import { useCartStore } from '../context/cartStore';
 
 const Menu = () => {
   const { slug } = useParams();
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const mesaParam = searchParams.get('mesa');
+  const isMozo = searchParams.get('mozo') === 'true';
+
   const [local, setLocal] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [selectedTableNum, setSelectedTableNum] = useState<string>('');
+  const [selectedTableNum, setSelectedTableNum] = useState<string>(mesaParam || '');
   const [isOrderSuccess, setIsOrderSuccess] = useState(false);
+  const [lastOrderId, setLastOrderId] = useState<number | null>(null);
   const [placingOrder, setPlacingOrder] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'MercadoPago'>('Efectivo');
+  const [paymentMethod, setPaymentMethod] = useState<'Efectivo' | 'MercadoPago'>(isMozo ? 'Efectivo' : 'Efectivo');
 
   const { items, addItem, removeItem, total, clearCart } = useCartStore();
 
@@ -70,7 +76,7 @@ const Menu = () => {
   const confirmOrder = async () => {
     setPlacingOrder(true);
     try {
-      await api.post('/orders', {
+      const response = await api.post('/orders', {
         localId: local.id,
         mesa: selectedTableNum,
         metodoPago: paymentMethod,
@@ -82,6 +88,7 @@ const Menu = () => {
           aclaracion: ''
         }))
       });
+      setLastOrderId(response.data.id);
       setIsOrderSuccess(true);
       clearCart();
     } catch (err) {
@@ -135,12 +142,22 @@ const Menu = () => {
           <p className="text-gray-400 max-w-sm mb-12 font-medium leading-relaxed mx-auto text-lg">
             Estamos preparando tu pedido de <span className="text-white font-bold">{local.nombre}</span> para la <span className="text-primary font-black uppercase">Mesa {selectedTableNum}</span>.
           </p>
-          <button 
-            onClick={() => setIsOrderSuccess(false)}
-            className="shimmer-btn relative overflow-hidden bg-primary text-white px-12 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs transition-all active:scale-95 shadow-2xl shadow-primary/30"
-          >
-            Volver al Menú
-          </button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <button 
+              onClick={() => isMozo ? navigate('/mozo/dashboard') : setIsOrderSuccess(false)}
+              className="shimmer-btn relative overflow-hidden bg-white/5 text-white px-8 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs transition-all active:scale-95 border border-white/10"
+            >
+              {isMozo ? 'Volver al Panel Mozo' : 'Cerrar'}
+            </button>
+            {!isMozo && lastOrderId && (
+              <button 
+                onClick={() => navigate(`/status/${lastOrderId}`)}
+                className="shimmer-btn relative overflow-hidden bg-primary text-white px-12 py-5 rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs transition-all active:scale-95 shadow-2xl shadow-primary/30 flex items-center justify-center gap-3"
+              >
+                Seguir mi Pedido <ArrowRight size={16} />
+              </button>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -387,12 +404,13 @@ const Menu = () => {
                       {local.mesas && local.mesas.map((mesa: any) => (
                         <button
                           key={mesa.id}
+                          disabled={isMozo && !!mesaParam}
                           onClick={() => setSelectedTableNum(mesa.numero)}
                           className={`flex-1 min-w-[70px] sm:min-w-0 py-3 sm:py-4 px-2 rounded-xl sm:rounded-2xl border-2 transition-all font-black text-sm sm:text-lg truncate ${
                             selectedTableNum === mesa.numero
                               ? 'border-primary bg-primary/10 text-primary shadow-[0_0_20px_rgba(255,107,0,0.2)]'
                               : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/10'
-                          }`}
+                          } ${(isMozo && !!mesaParam && selectedTableNum !== mesa.numero) ? 'opacity-30' : ''}`}
                           title={mesa.numero}
                         >
                           {mesa.numero}
@@ -402,28 +420,30 @@ const Menu = () => {
                   </div>
 
                   {/* Payment Methods */}
-                  <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                    <button 
-                      onClick={() => setPaymentMethod('Efectivo')}
-                      className={`flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-5 rounded-2xl sm:rounded-[1.8rem] border-2 transition-all font-black text-[9px] sm:text-xs uppercase tracking-widest ${
-                        paymentMethod === 'Efectivo' 
-                        ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
-                        : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
-                      }`}
-                    >
-                      💵 Efectivo
-                    </button>
-                    <button 
-                      onClick={() => setPaymentMethod('MercadoPago')}
-                      className={`flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-5 rounded-2xl sm:rounded-[1.8rem] border-2 transition-all font-black text-[9px] sm:text-xs uppercase tracking-widest ${
-                        paymentMethod === 'MercadoPago' 
-                        ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
-                        : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
-                      }`}
-                    >
-                      📱 M. Pago
-                    </button>
-                  </div>
+                  {!isMozo && (
+                    <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                      <button 
+                        onClick={() => setPaymentMethod('Efectivo')}
+                        className={`flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-5 rounded-2xl sm:rounded-[1.8rem] border-2 transition-all font-black text-[9px] sm:text-xs uppercase tracking-widest ${
+                          paymentMethod === 'Efectivo' 
+                          ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
+                          : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                        }`}
+                      >
+                        💵 Efectivo
+                      </button>
+                      <button 
+                        onClick={() => setPaymentMethod('MercadoPago')}
+                        className={`flex items-center justify-center gap-2 sm:gap-3 py-3.5 sm:py-5 rounded-2xl sm:rounded-[1.8rem] border-2 transition-all font-black text-[9px] sm:text-xs uppercase tracking-widest ${
+                          paymentMethod === 'MercadoPago' 
+                          ? 'bg-primary/10 border-primary text-primary shadow-xl shadow-primary/10' 
+                          : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                        }`}
+                      >
+                        📱 M. Pago
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

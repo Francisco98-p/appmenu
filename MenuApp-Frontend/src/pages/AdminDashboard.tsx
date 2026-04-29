@@ -71,6 +71,14 @@ const AdminDashboard = () => {
       fetchTables();
     });
 
+    socket.on('orderStatusUpdated', (updatedOrder) => {
+      setOrders(prev => prev.map(o => o.id === updatedOrder.id ? updatedOrder : o));
+    });
+
+    socket.on('orderPaymentUpdated', (updatedOrder) => {
+      setOrders(prev => prev.map(o => o.id === updatedOrder.id ? updatedOrder : o));
+    });
+
     const interval = setInterval(() => { fetchOrders(); fetchTables(); }, 30000); // Backup polling
     return () => {
       clearInterval(interval);

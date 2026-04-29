@@ -27,8 +27,17 @@ export const updateOrderStatus = async (req: Request, res: Response) => {
   try {
     const order = await prisma.order.update({
       where: { id: parseInt(id) },
-      data: { estado }
+      data: { estado },
+      include: {
+        items: {
+          include: { producto: true }
+        }
+      }
     });
+    
+    const { io } = require('../index');
+    io.emit('orderStatusUpdated', order);
+    
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: 'Error updating order status' });
@@ -74,8 +83,17 @@ export const updateOrderPaymentStatus = async (req: Request, res: Response) => {
   try {
     const order = await prisma.order.update({
       where: { id: parseInt(id) },
-      data: { pagoConfirmado }
+      data: { pagoConfirmado },
+      include: {
+        items: {
+          include: { producto: true }
+        }
+      }
     });
+    
+    const { io } = require('../index');
+    io.emit('orderPaymentUpdated', order);
+
     res.json(order);
   } catch (error) {
     res.status(500).json({ message: 'Error updating payment status' });
