@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import Menu from './pages/Menu';
-import Login from './pages/Login';
-import AdminDashboard from './pages/AdminDashboard';
-import PaymentSuccess from './pages/PaymentSuccess';
-import PaymentFailure from './pages/PaymentFailure';
-import PaymentPending from './pages/PaymentPending';
-import OrderStatus from './pages/OrderStatus';
-import DemoLinks from './pages/DemoLinks';
 import { useAuthStore } from './context/authStore';
+
+const Menu = lazy(() => import('./pages/Menu'));
+const Login = lazy(() => import('./pages/Login'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const PaymentSuccess = lazy(() => import('./pages/PaymentSuccess'));
+const PaymentFailure = lazy(() => import('./pages/PaymentFailure'));
+const PaymentPending = lazy(() => import('./pages/PaymentPending'));
+const OrderStatus = lazy(() => import('./pages/OrderStatus'));
+const DemoLinks = lazy(() => import('./pages/DemoLinks'));
+
+const PageLoader = () => (
+  <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+    <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const token = useAuthStore(state => state.token);
@@ -19,32 +26,30 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 function App() {
   return (
     <BrowserRouter>
-      <Routes>
-        {/* Demo/landing Route */}
-        <Route path="/" element={<DemoLinks />} />
-        <Route path="/demo" element={<DemoLinks />} />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<DemoLinks />} />
+          <Route path="/demo" element={<DemoLinks />} />
 
-        {/* Customer Routes */}
           <Route path="/m/:slug" element={<Menu />} />
           <Route path="/success" element={<PaymentSuccess />} />
           <Route path="/failure" element={<PaymentFailure />} />
           <Route path="/pending" element={<PaymentPending />} />
-          <Route path="/status/:orderId" element={<OrderStatus />} />
+          <Route path="/status" element={<OrderStatus />} />
 
-          {/* Admin Routes */}
-        <Route path="/admin/login" element={<Login />} />
-        <Route 
-          path="/admin/dashboard" 
-          element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
-        
-        {/* Default Redirect */}
-        <Route path="*" element={<Navigate to="/m/sanjuan-gourmet" replace />} />
-      </Routes>
+          <Route path="/admin/login" element={<Login />} />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <ProtectedRoute>
+                <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </BrowserRouter>
   );
 }

@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
 
 export const getKitchens = async (req: Request, res: Response) => {
-  const localId = (req as any).user?.localId;
+  const localId = req.user?.localId;
   
   if (!localId) {
     return res.status(400).json({ message: 'Local ID is required' });
@@ -10,7 +10,7 @@ export const getKitchens = async (req: Request, res: Response) => {
 
   try {
     const kitchens = await prisma.kitchen.findMany({
-      where: { localId: parseInt(localId) },
+      where: { localId: localId },
       orderBy: { nombre: 'asc' }
     });
     res.json(kitchens);
@@ -21,7 +21,7 @@ export const getKitchens = async (req: Request, res: Response) => {
 };
 
 export const createKitchen = async (req: Request, res: Response) => {
-  const localId = (req as any).user?.localId;
+  const localId = req.user?.localId;
   const { nombre } = req.body;
 
   if (!localId || !nombre) {
@@ -30,7 +30,7 @@ export const createKitchen = async (req: Request, res: Response) => {
 
   try {
     const kitchen = await prisma.kitchen.create({
-      data: { localId: parseInt(localId), nombre }
+      data: { localId: localId, nombre }
     });
     res.json(kitchen);
   } catch (err) {

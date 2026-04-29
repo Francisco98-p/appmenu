@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { XCircle, ArrowLeft, RotateCcw } from 'lucide-react';
+import { XCircle, RotateCcw } from 'lucide-react';
 
 const PaymentFailure = () => {
   const navigate = useNavigate();

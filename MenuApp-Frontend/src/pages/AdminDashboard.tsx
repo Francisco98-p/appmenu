@@ -55,7 +55,7 @@ const AdminDashboard = () => {
     fetchKitchens();
 
         // Set up real-time updates
-    const socket = io('http://localhost:3001', {
+    const socket = io(window.location.origin, {
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, ChefHat, Utensils, ArrowLeft, RotateCcw, Star, Sparkles } from 'lucide-react';
 import api from '../api/axios';
@@ -131,7 +131,7 @@ const OrderStatus = () => {
            <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48 ${status.bg} blur-[60px] rounded-full opacity-50`}></div>
 
            <div className={`w-32 h-32 ${status.bg} ${status.color} rounded-[2.5rem] flex items-center justify-center mb-10 mx-auto border border-white/5 relative z-10 shadow-2xl`}>
-             {React.cloneElement(status.icon as React.ReactElement, { size: 64, strokeWidth: 1.5 })}
+             {React.cloneElement(status.icon as React.ReactElement<{ size?: number; strokeWidth?: number }>, { size: 64, strokeWidth: 1.5 })}
            </div>
 
            <h2 className={`text-5xl font-black italic uppercase tracking-tighter mb-4 leading-none ${status.color}`}>

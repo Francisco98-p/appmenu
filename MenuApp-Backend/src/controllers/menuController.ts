@@ -1,6 +1,46 @@
 import { Request, Response } from 'express';
 import { prisma, io } from '../index';
 
+export const getOrderById = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const orderId = parseInt(id, 10);
+  if (isNaN(orderId)) {
+    return res.status(400).json({ message: 'Invalid order ID' });
+  }
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      include: {
+        items: {
+          include: { producto: true }
+        }
+      }
+    });
+
+    if (!order) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    res.json({
+      id: order.id,
+      mesa: order.mesa,
+      estado: order.estado,
+      pagoConfirmado: order.pagoConfirmado,
+      total: order.total,
+      metodoPago: order.metodoPago,
+      createdAt: order.createdAt,
+      items: order.items.map((item) => ({
+        cantidad: item.cantidad,
+        nombre: item.producto.nombre,
+        precioUnitario: item.precioUnitario
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 export const getMenuBySlug = async (req: Request, res: Response) => {
   const { slug } = req.params;
 

@@ -318,7 +318,7 @@ const Menu = () => {
               <p className="text-base sm:text-xl font-black leading-none">{formatPrice(total())}</p>
             </div>
             <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 flex items-center justify-center group-hover:translate-x-1 transition-transform shrink-0">
-              <ArrowRight size={16} sm:size={20} />
+              <ArrowRight size={16} />
             </div>
           </button>
         </div>
@@ -335,7 +335,7 @@ const Menu = () => {
             <div className="p-6 sm:p-10 border-b border-white/5 flex justify-between items-center bg-black/20">
               <div>
                 <div className="flex items-center gap-2 sm:gap-3 text-primary font-black text-[9px] sm:text-[10px] uppercase tracking-[0.2em] mb-1 sm:mb-2">
-                  <ShoppingCart size={12} sm:size={14} /> Tu Selección
+                  <ShoppingCart size={12} /> Tu Selección
                 </div>
                 <h2 className="text-2xl sm:text-4xl font-black text-white italic uppercase tracking-tighter leading-none">Carrito</h2>
               </div>
@@ -343,7 +343,7 @@ const Menu = () => {
                 onClick={() => setIsCartOpen(false)} 
                 className="w-10 h-10 sm:w-14 sm:h-14 bg-white/5 hover:bg-white/10 rounded-xl sm:rounded-2xl flex items-center justify-center text-gray-400 hover:text-white transition-all active:scale-90 border border-white/5"
               >
-                <X size={20} sm:size={28} />
+                <X size={20} />
               </button>
             </div>
 
@@ -352,7 +352,7 @@ const Menu = () => {
               <div className="space-y-6 sm:space-y-8">
                 {items.length === 0 ? (
                   <div className="h-full flex flex-col items-center justify-center text-center opacity-40 py-10">
-                    <Utensils size={60} sm:size={80} className="mb-4 sm:mb-6" strokeWidth={1} />
+                    <Utensils size={60} className="mb-4 sm:mb-6" strokeWidth={1} />
                     <p className="font-bold text-lg sm:text-xl uppercase italic tracking-widest">El carrito está vacío</p>
                   </div>
                 ) : (
@@ -453,7 +453,7 @@ const Menu = () => {
                   ) : (
                     <>
                       <span>CONFIRMAR PEDIDO</span>
-                      <ArrowRight size={20} sm:size={24} />
+                      <ArrowRight size={20} />
                     </>
                   )}
                 </button>
