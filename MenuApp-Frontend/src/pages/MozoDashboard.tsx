@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ShoppingBag, Utensils, LogOut, CheckCircle, Clock, ArrowRight, X, ChefHat, Plus, Star, MapPin, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Utensils, LogOut, CheckCircle, Clock, ArrowRight, X, Plus, MapPin, Search } from 'lucide-react';
 import api from '../api/axios';
 import { useAuthStore } from '../context/authStore';
 import { useNavigate } from 'react-router-dom';
