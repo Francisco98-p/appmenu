@@ -21,9 +21,11 @@ async function main() {
     data: {
       nombre: 'Chilli Garden',
       slug: 'chilligarden',
-      logo: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=200&h=200', // Keep original or use a generic logo
+      logo: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=200&h=200',
       mercadoPagoLink: 'https://link.mercadopago.com.ar/chilligarden',
       cbuAlias: 'CHILLI.GARDEN.PAY',
+      horarioApertura: '18:00',
+      horarioCierre: '00:00',
     },
   });
 

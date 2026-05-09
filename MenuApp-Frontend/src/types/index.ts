@@ -41,6 +41,8 @@ export interface Local {
   slug: string;
   cbuAlias?: string;
   mercadoPagoLink?: string;
+  horarioApertura?: string;
+  horarioCierre?: string;
   categorias: Category[];
   mesas: Table[];
 }
@@ -77,6 +79,7 @@ export interface Order {
   estado: string;
   total: number;
   metodoPago: string;
+  tipoOrden?: string;
   pagoConfirmado: boolean;
   createdAt: string;
   items: OrderItem[];

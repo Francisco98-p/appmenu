@@ -71,9 +71,9 @@ export const getMenuBySlug = async (req: Request, res: Response) => {
 };
 
 export const placeOrder = async (req: Request, res: Response) => {
-  const { localId, mesa, metodoPago, items, total } = req.body;
+  const { localId, mesa, metodoPago, items, total, tipoOrden } = req.body;
 
-  console.log('Order request:', { localId, mesa, metodoPago, total, items });
+  console.log('Order request:', { localId, mesa, metodoPago, total, tipoOrden, items });
 
   try {
     // Verify local exists
@@ -96,6 +96,7 @@ export const placeOrder = async (req: Request, res: Response) => {
         mesa,
         metodoPago,
         total,
+        tipoOrden: tipoOrden ?? 'salon',
         estado: 'Recibido',
         items: {
           create: items.map((item: any) => ({

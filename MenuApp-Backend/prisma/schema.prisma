@@ -18,17 +18,19 @@ model User {
 }
 
 model Local {
-  id         Int        @id @default(autoincrement())
-  nombre     String
-  logo       String?
-  slug       String     @unique
-  cbuAlias   String?    // CBU o Alias para transferencias
-  mercadoPagoLink String? // Link de pago de Mercado Pago
-  categorias Category[]
-  pedidos    Order[]
-  mesas      Table[]
-  users      User[]
-  kitchens   Kitchen[]
+  id              Int        @id @default(autoincrement())
+  nombre          String
+  logo            String?
+  slug            String     @unique
+  cbuAlias        String?
+  mercadoPagoLink String?
+  horarioApertura String?
+  horarioCierre   String?
+  categorias      Category[]
+  pedidos         Order[]
+  mesas           Table[]
+  users           User[]
+  kitchens        Kitchen[]
 }
 
 model Table {
@@ -77,6 +79,7 @@ model Order {
   estado         String      @default("Recibido")
   total          Float
   metodoPago     String
+  tipoOrden      String      @default("salon")
   pagoConfirmado Boolean     @default(false)
   createdAt      DateTime    @default(now())
   local          Local       @relation(fields: [localId], references: [id])
