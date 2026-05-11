@@ -26,6 +26,8 @@ model Local {
   mercadoPagoLink String?
   horarioApertura String?
   horarioCierre   String?
+  direccion       String?
+  diasAtencion    String?
   categorias      Category[]
   pedidos         Order[]
   mesas           Table[]

@@ -206,9 +206,18 @@ const Menu = () => {
                 <div className="flex items-center gap-1.5 mt-1.5">
                   <Clock size={12} className="text-green-400 shrink-0" />
                   <span className="text-green-400 font-bold text-xs">
-                    Abre {local.horarioApertura}
-                    {local.horarioCierre ? ` · Cierra ${local.horarioCierre}` : ''}
+                    {local.diasAtencion ? `${local.diasAtencion} de ` : ''}{local.horarioApertura}
+                    {local.horarioCierre ? ` a ${local.horarioCierre}` : ''}
                   </span>
+                </div>
+              )}
+              {local.direccion && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <svg className="text-gray-400 shrink-0 w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span className="text-gray-400 font-bold text-xs">{local.direccion}</span>
                 </div>
               )}
             </div>
@@ -222,21 +231,19 @@ const Menu = () => {
           <div className="flex gap-1 bg-white/5 rounded-2xl p-1 border border-white/5 w-fit">
             <button
               onClick={() => setTipoOrden('salon')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                tipoOrden === 'salon'
-                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                  : 'text-gray-500 hover:text-gray-300'
-              }`}
+              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${tipoOrden === 'salon'
+                ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                : 'text-gray-500 hover:text-gray-300'
+                }`}
             >
               Salón
             </button>
             <button
               onClick={() => setTipoOrden('retirar')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                tipoOrden === 'retirar'
-                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                  : 'text-gray-500 hover:text-gray-300'
-              }`}
+              className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${tipoOrden === 'retirar'
+                ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                : 'text-gray-500 hover:text-gray-300'
+                }`}
             >
               Retirar
             </button>
@@ -271,11 +278,10 @@ const Menu = () => {
                 window.scrollTo({ top: y, behavior: 'smooth' });
               }
             }}
-            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.12em] transition-all duration-300 whitespace-nowrap ${
-              selectedCategory === cat.id
-                ? 'bg-primary text-white shadow-[0_6px_20px_rgba(255,77,28,0.3)]'
-                : 'bg-white/5 text-gray-500 hover:bg-white/10 border border-white/5'
-            }`}
+            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.12em] transition-all duration-300 whitespace-nowrap ${selectedCategory === cat.id
+              ? 'bg-primary text-white shadow-[0_6px_20px_rgba(255,77,28,0.3)]'
+              : 'bg-white/5 text-gray-500 hover:bg-white/10 border border-white/5'
+              }`}
           >
             {cat.nombre}
           </button>
@@ -430,15 +436,13 @@ const Menu = () => {
                     <div className="flex gap-1 bg-white/5 rounded-xl p-1 border border-white/5 w-fit">
                       <button
                         onClick={() => setTipoOrden('salon')}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-                          tipoOrden === 'salon' ? 'bg-primary text-white' : 'text-gray-500'
-                        }`}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${tipoOrden === 'salon' ? 'bg-primary text-white' : 'text-gray-500'
+                          }`}
                       >Salón</button>
                       <button
                         onClick={() => setTipoOrden('retirar')}
-                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${
-                          tipoOrden === 'retirar' ? 'bg-primary text-white' : 'text-gray-500'
-                        }`}
+                        className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-wider transition-all ${tipoOrden === 'retirar' ? 'bg-primary text-white' : 'text-gray-500'
+                          }`}
                       >Retirar</button>
                     </div>
                   </div>
@@ -452,11 +456,10 @@ const Menu = () => {
                             key={mesa.id}
                             disabled={isMozo && !!mesaParam}
                             onClick={() => setSelectedTableNum(mesa.numero)}
-                            className={`py-2.5 px-4 rounded-xl border-2 transition-all font-black text-sm ${
-                              selectedTableNum === mesa.numero
-                                ? 'border-primary bg-primary/10 text-primary'
-                                : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/20'
-                            }`}
+                            className={`py-2.5 px-4 rounded-xl border-2 transition-all font-black text-sm ${selectedTableNum === mesa.numero
+                              ? 'border-primary bg-primary/10 text-primary'
+                              : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/20'
+                              }`}
                           >
                             {mesa.numero}
                           </button>
@@ -471,21 +474,19 @@ const Menu = () => {
                       <div className="grid grid-cols-2 gap-2">
                         <button
                           onClick={() => setPaymentMethod('Efectivo')}
-                          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${
-                            paymentMethod === 'Efectivo'
-                              ? 'bg-primary/10 border-primary text-primary'
-                              : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
-                          }`}
+                          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${paymentMethod === 'Efectivo'
+                            ? 'bg-primary/10 border-primary text-primary'
+                            : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                            }`}
                         >
                           💵 Efectivo
                         </button>
                         <button
                           onClick={() => setPaymentMethod('MercadoPago')}
-                          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${
-                            paymentMethod === 'MercadoPago'
-                              ? 'bg-primary/10 border-primary text-primary'
-                              : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
-                          }`}
+                          className={`flex items-center justify-center gap-2 py-3 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${paymentMethod === 'MercadoPago'
+                            ? 'bg-primary/10 border-primary text-primary'
+                            : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                            }`}
                         >
                           📱 M. Pago
                         </button>
@@ -504,11 +505,10 @@ const Menu = () => {
               <button
                 disabled={placingOrder || items.length === 0}
                 onClick={handlePlaceOrder}
-                className={`w-full py-5 rounded-[1.8rem] font-black text-sm tracking-[0.15em] transition-all duration-300 flex items-center justify-center gap-3 ${
-                  placingOrder || items.length === 0
-                    ? 'bg-gray-800 text-gray-600 cursor-not-allowed opacity-50'
-                    : 'bg-gradient-to-r from-primary to-orange-600 text-white shadow-[0_10px_30px_rgba(255,77,28,0.4)] hover:scale-[1.02] active:scale-95'
-                }`}
+                className={`w-full py-5 rounded-[1.8rem] font-black text-sm tracking-[0.15em] transition-all duration-300 flex items-center justify-center gap-3 ${placingOrder || items.length === 0
+                  ? 'bg-gray-800 text-gray-600 cursor-not-allowed opacity-50'
+                  : 'bg-gradient-to-r from-primary to-orange-600 text-white shadow-[0_10px_30px_rgba(255,77,28,0.4)] hover:scale-[1.02] active:scale-95'
+                  }`}
               >
                 {placingOrder ? (
                   <div className="flex items-center gap-3">

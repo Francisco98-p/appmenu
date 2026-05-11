@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log('🧹 Limpiando base de datos para Chilli Garden...');
-  
+
   // Limpiar datos antiguos en orden jerárquico correcto
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
@@ -24,8 +24,10 @@ async function main() {
       logo: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=200&h=200',
       mercadoPagoLink: 'https://link.mercadopago.com.ar/chilligarden',
       cbuAlias: 'CHILLI.GARDEN.PAY',
-      horarioApertura: '18:00',
-      horarioCierre: '00:00',
+      horarioApertura: '19:30',
+      horarioCierre: '02:00',
+      direccion: 'GENERAL PAZ 2741 - Oeste (Entre Paula y Lateral)',
+      diasAtencion: 'Martes a Domingo',
     },
   });
 
