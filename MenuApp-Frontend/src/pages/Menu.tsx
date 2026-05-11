@@ -178,26 +178,27 @@ const Menu = () => {
     )
   })).filter((cat: any) => cat.productos.length > 0);
 
+  const coverImage = local.coverImage || local.logo;
+  const logoSrc = local.logo;
+
   return (
     <div className="min-h-screen bg-[#080B10] pb-32 text-gray-100 selection:bg-primary selection:text-white">
 
       {/* Hero Header */}
       <div className="relative h-[200px] sm:h-[260px] overflow-hidden">
-        {local.logo && (
+        {coverImage && (
           <div className="absolute inset-0">
-            <img src={local.logo} alt="" className="w-full h-full object-cover opacity-40 blur-[2px] scale-110" />
+            <img src={coverImage} alt="" className="w-full h-full object-cover opacity-40 blur-[2px] scale-110" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#080B10] via-[#080B10]/50 to-transparent"></div>
           </div>
         )}
         <div className="relative z-10 h-full flex flex-col justify-end px-4 sm:px-8 pb-5 max-w-3xl mx-auto w-full">
           <div className="flex items-end gap-4">
-            {local.logo && (
-              <img
-                src={local.logo}
-                alt={local.nombre}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-white/10 shadow-xl shrink-0"
-              />
-            )}
+            <img
+              src="/images/chilligarden/logo.png"
+              alt={local.nombre}
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-2 border-white/10 shadow-xl shrink-0"
+            />
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl sm:text-3xl font-black tracking-tighter text-white uppercase italic leading-none truncate">
                 {local.nombre}
@@ -232,8 +233,8 @@ const Menu = () => {
             <button
               onClick={() => setTipoOrden('salon')}
               className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${tipoOrden === 'salon'
-                ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                : 'text-gray-500 hover:text-gray-300'
+                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                  : 'text-gray-500 hover:text-gray-300'
                 }`}
             >
               Salón
@@ -241,8 +242,8 @@ const Menu = () => {
             <button
               onClick={() => setTipoOrden('retirar')}
               className={`px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${tipoOrden === 'retirar'
-                ? 'bg-primary text-white shadow-lg shadow-primary/30'
-                : 'text-gray-500 hover:text-gray-300'
+                  ? 'bg-primary text-white shadow-lg shadow-primary/30'
+                  : 'text-gray-500 hover:text-gray-300'
                 }`}
             >
               Retirar
@@ -279,8 +280,8 @@ const Menu = () => {
               }
             }}
             className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.12em] transition-all duration-300 whitespace-nowrap ${selectedCategory === cat.id
-              ? 'bg-primary text-white shadow-[0_6px_20px_rgba(255,77,28,0.3)]'
-              : 'bg-white/5 text-gray-500 hover:bg-white/10 border border-white/5'
+                ? 'bg-primary text-white shadow-[0_6px_20px_rgba(255,77,28,0.3)]'
+                : 'bg-white/5 text-gray-500 hover:bg-white/10 border border-white/5'
               }`}
           >
             {cat.nombre}
@@ -457,8 +458,8 @@ const Menu = () => {
                             disabled={isMozo && !!mesaParam}
                             onClick={() => setSelectedTableNum(mesa.numero)}
                             className={`py-2.5 px-4 rounded-xl border-2 transition-all font-black text-sm ${selectedTableNum === mesa.numero
-                              ? 'border-primary bg-primary/10 text-primary'
-                              : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/20'
+                                ? 'border-primary bg-primary/10 text-primary'
+                                : 'border-white/5 bg-white/5 text-gray-500 hover:border-white/20'
                               }`}
                           >
                             {mesa.numero}
@@ -475,8 +476,8 @@ const Menu = () => {
                         <button
                           onClick={() => setPaymentMethod('Efectivo')}
                           className={`flex items-center justify-center gap-2 py-3 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${paymentMethod === 'Efectivo'
-                            ? 'bg-primary/10 border-primary text-primary'
-                            : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                              ? 'bg-primary/10 border-primary text-primary'
+                              : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
                             }`}
                         >
                           💵 Efectivo
@@ -484,8 +485,8 @@ const Menu = () => {
                         <button
                           onClick={() => setPaymentMethod('MercadoPago')}
                           className={`flex items-center justify-center gap-2 py-3 rounded-2xl border-2 transition-all font-black text-[10px] uppercase tracking-widest ${paymentMethod === 'MercadoPago'
-                            ? 'bg-primary/10 border-primary text-primary'
-                            : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
+                              ? 'bg-primary/10 border-primary text-primary'
+                              : 'bg-white/5 border-white/5 text-gray-600 hover:bg-white/10'
                             }`}
                         >
                           📱 M. Pago
@@ -506,8 +507,8 @@ const Menu = () => {
                 disabled={placingOrder || items.length === 0}
                 onClick={handlePlaceOrder}
                 className={`w-full py-5 rounded-[1.8rem] font-black text-sm tracking-[0.15em] transition-all duration-300 flex items-center justify-center gap-3 ${placingOrder || items.length === 0
-                  ? 'bg-gray-800 text-gray-600 cursor-not-allowed opacity-50'
-                  : 'bg-gradient-to-r from-primary to-orange-600 text-white shadow-[0_10px_30px_rgba(255,77,28,0.4)] hover:scale-[1.02] active:scale-95'
+                    ? 'bg-gray-800 text-gray-600 cursor-not-allowed opacity-50'
+                    : 'bg-gradient-to-r from-primary to-orange-600 text-white shadow-[0_10px_30px_rgba(255,77,28,0.4)] hover:scale-[1.02] active:scale-95'
                   }`}
               >
                 {placingOrder ? (
